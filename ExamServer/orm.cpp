@@ -12,13 +12,13 @@ ORM::ORM(QObject *parent) : QObject(parent)
     }
 }
 
-QVector<QVector<QVariant>> ORM::getAll(QString sql, QVector<QString> args)
+QVector<QVector<QVariant>> ORM::getAll(QString sql, QVector<QVariant> args)
 {
     QVector<QVector<QVariant>> res;
     QSqlQuery q;
     if (query(q, sql, args)) {
         while (q.next()) {
-            QVector<QString> item;
+            QVector<QVariant> item;
             int idx = 0;
             while (q.value(idx).isValid()) {
                 item.push_back(q.value(idx++));
@@ -29,7 +29,7 @@ QVector<QVector<QVariant>> ORM::getAll(QString sql, QVector<QString> args)
     return res;
 }
 
-QVector<QVariant> ORM::getRow(QString sql, QVector<QString> args)
+QVector<QVariant> ORM::getRow(QString sql, QVector<QVariant> args)
 {
     QSqlQuery q;
     QVector<QVariant> res;
@@ -45,7 +45,13 @@ QVector<QVariant> ORM::getRow(QString sql, QVector<QString> args)
     return res;
 }
 
-int ORM::execute(QString sql, QVector<QString> args)
+QVariant ORM::getOne(QString sql, QVector<QVariant> args)
+{
+    QVector<QVariant> res = getRow(sql, args);
+    return res[0];
+}
+
+int ORM::execute(QString sql, QVector<QVariant> args)
 {
     QSqlQuery q;
     if (query(q, sql, args)) {
@@ -59,7 +65,7 @@ int ORM::execute(QString sql, QVector<QString> args)
     }
 }
 
-bool ORM::query(QSqlQuery &query, QString sql, QVector<QString> args)
+bool ORM::query(QSqlQuery &query, QString sql, QVector<QVariant> args)
 {
     query.prepare(sql);
 

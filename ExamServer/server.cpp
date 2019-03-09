@@ -23,28 +23,45 @@ void Server::incomingConnection(qintptr handle)
 
     //根据连接顺序自动建立编号 并下发给客户端
     client->setClientId(idKey);
-    idKey++;
     client->sendMessage(command.stringify(Command::SERVER_HAS_CONFIRM_ID, QString::number(client->getClientId())));
-    socketPool.append(client);
+    socketPool[idKey] = client;
+    emit newClientIn(idKey);
 
+    idKey++;
     //QObject::connect(this, SIGNAL(messageSend(int,QString)), client, SLOT(sendMessage(int,QString)));
     //QObject::connect(thread, &QThread::finished, client, &Client::deleteLater);
     //QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     //client->moveToThread(thread);
     //thread->start();
+    emit newConnection();
 }
 
 void Server::sendMessage(int clientId, QString message)
 {
     if (clientId <= 0) {
         for (Client *client : socketPool) {
-            client->sendMessage(message);
-        }
-    } else {
-        for (Client *client : socketPool) {
-            if (client->getClientId() == clientId) {
+            if (client != NULL) {
                 client->sendMessage(message);
             }
         }
+    } else {
+        socketPool[clientId]->sendMessage(message);
+    }
+}
+
+bool Server::changeClientId(int newId, int oldId)
+{
+    if (socketPool[newId] != NULL) {
+        return false;
+    } else {
+        socketPool[newId] = socketPool[oldId];
+        socketPool[oldId] = NULL;
+        socketPool[newId]->setClientId(newId);
+
+        if (idKey <= newId) {
+            idKey = newId + 1;
+            //避免下一次客户端连接的时候占用这个位置
+        }
+        return true;
     }
 }

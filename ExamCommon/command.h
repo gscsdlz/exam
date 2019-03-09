@@ -27,7 +27,6 @@ public:
         //initForm上行通知服务端的指令 3xx
         CLIENT_APPLY_CLIENT_ID = 301,   //客户端想申请编号
         CLIENT_START_LOGIN = 302,       //客户端发起登录请求
-        CLIENT_UPLOAD_CLIENT_ID = 303,  //客户端上传自己保存的ID 连接后第一步就做此操作
 
         //studentMain上行通知服务端的指令 4xx
         CLIENT_APPLY_EXAM_INFO = 401,   //客户端申请获取题目信息

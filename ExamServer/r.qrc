@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>r/clock.png</file>
+        <file>r/close.png</file>
+        <file>r/init.png</file>
+        <file>r/init_bg_1.jpg</file>
+        <file>r/init_bg_2.jpg</file>
+        <file>r/ok.png</file>
+        <file>r/settings.png</file>
+    </qresource>
+</RCC>

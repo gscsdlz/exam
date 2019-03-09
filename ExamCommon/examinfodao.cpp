@@ -5,12 +5,12 @@ ExamInfoDao::ExamInfoDao()
 
 }
 
-void ExamInfoDao::_set(QString key, QVariant val)
+QVariant ExamInfoDao::_get(QString key)
 {
-    if (key == "startTime" || key == "endTime") {
-        DAO::_set(key, QDateTime::fromString(startTime, "yyyy-MM-dd HH:mm:ss").toTime_t());
-    } else {
-        DAO::_set(key, val);
-    }
-}
+    if (key == "str_start_time" || key == "str_end_time") {
+        QDateTime T = QDateTime::fromMSecsSinceEpoch(DAO::_get(key.mid(4)).toLongLong());
 
+        return T.toString("yyyy-MM-dd HH:mm:ss");
+    }
+    return DAO::_get(key);
+}

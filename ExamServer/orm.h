@@ -20,12 +20,13 @@ public:
         }
         return instance;
     }
-    QVector<QVector<QVariant>> getAll(QString, QVector<QString> args = QVector<QString>());
-    QVector<QVariant> getRow(QString, QVector<QString> args = QVector<QString>());
-    int execute(QString, QVector<QString> args = QVector<QString>());
+    QVector<QVector<QVariant>> getAll(QString, QVector<QVariant> args = QVector<QVariant>());
+    QVector<QVariant> getRow(QString, QVector<QVariant> args = QVector<QVariant>());
+    QVariant getOne(QString, QVector<QVariant> args = QVector<QVariant>());
+    int execute(QString, QVector<QVariant> args = QVector<QVariant>());
 
 protected:
-    bool query(QSqlQuery &, QString, QVector<QString>);
+    bool query(QSqlQuery &, QString, QVector<QVariant>);
 private:
     explicit ORM(QObject *parent = 0);
     QSqlDatabase db;

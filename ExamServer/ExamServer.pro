@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     ../ExamCommon/examinfodao.cpp \
     ../ExamCommon/studentinfodao.cpp \
     orm.cpp \
-    ../ExamCommon/classinfodao.cpp
+    ../ExamCommon/classinfodao.cpp \
+    ../ExamCommon/dao.cpp
 
 HEADERS  += monitormain.h \
     server.h \
@@ -37,10 +38,14 @@ HEADERS  += monitormain.h \
     ../ExamCommon/examinfodao.h \
     ../ExamCommon/studentinfodao.h \
     orm.h \
-    ../ExamCommon/classinfodao.h
+    ../ExamCommon/classinfodao.h \
+    ../ExamCommon/dao.h
 
 FORMS    += monitormain.ui \
     dataconfig.ui
 
 DISTFILES += \
     ../ExamCommon/ExamCommon.pri
+
+RESOURCES += \
+    r.qrc

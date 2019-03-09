@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QThread>
-#include <QVector>
+#include <QMap>
 #include "../ExamCommon/client.h"
 #include "../ExamCommon/command.h"
 
@@ -14,16 +14,17 @@ class Server : public QTcpServer
 public:
     explicit Server(QObject *parent = 0);
     void incomingConnection(qintptr handle);
+    bool changeClientId(int, int);
 protected:
     QThread *getNewThread();
 signals:
     void messageRecv(int, QString);
     void connectStateChange(QAbstractSocket::SocketState);
-
+    void newClientIn(int);
 public slots:
     void sendMessage(int, QString);
 private:
-    QVector<Client *> socketPool;
+    QMap<int, Client *> socketPool;
     Command command;
     int idKey;
 };
