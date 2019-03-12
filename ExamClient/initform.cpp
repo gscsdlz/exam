@@ -123,6 +123,11 @@ void InitForm::handleCmd(int cmdId, QString arg)
         ui->status->setText(QStringLiteral("用户名或者密码错误，请重试"));
         ui->password->clear();
         break;
+    case Command::CLIENT_HAS_LOGIN:
+        ui->status->setText(QStringLiteral("当前用户已经登录！"));
+        ui->username->clear();
+        ui->password->clear();
+        break;
     case Command::CLIENT_LOGIN_SUCCESS:
         //登录成功进入考试 移交控制权
         hide();

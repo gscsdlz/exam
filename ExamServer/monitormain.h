@@ -1,14 +1,22 @@
 ﻿#ifndef MONITORMAIN_H
 #define MONITORMAIN_H
 
+#include <QMap>
 #include <QWidget>
 #include <QDebug>
 #include <QVector>
 #include <QStandardItemModel>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QStringList>
+#include <QJsonObject>
 #include <QCryptographicHash>
 #include "server.h"
 #include "../ExamCommon/command.h"
 #include "../ExamCommon/studentinfodao.h"
+#include "../ExamCommon/configloader.h"
+#include "../ExamCommon/examproblem.h"
+#include "../ExamCommon/clientstatus.h"
 #include "datafileload.h"
 
 namespace Ui {
@@ -24,13 +32,23 @@ public:
     ~MonitorMain();
     void changeClientId(int, int);
     void checkLogin(int, QString);
-    void setExamAndClass(int, int);
+    void dispatcherProblems(int);
+    void handleStatus(int, int);
+    void collectAnswer(int, QString);
+protected:
+    void sendCmd(QString);
+    QVector<int> getSelectedClient();
 public slots:
+    void setExamAndClass(int, int);
     void handleMessage(int, QString, int);
     void addClient(int);
 private slots:
     void on_orderMode_clicked();
     void on_startLogin_clicked();
+    void on_exitExam_clicked();
+    void on_unlockLogin_clicked();
+    void on_unlockExamStop_clicked();
+    void on_startExam_clicked();
 
 signals:
     void sendCtlMsg(int, QString);
@@ -42,6 +60,8 @@ private:
     int examId;
     int classId;
     QVector<StudentInfoDao> studentList;
+    QMap<int, int> clientRow;
+    QMap<QString, bool> loginVis;
 };
 
 #endif // MONITORMAIN_H

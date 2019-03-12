@@ -81,6 +81,45 @@
     <string>进入编号模式</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="unlockLogin">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>580</y>
+     <width>120</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>解除登录</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="unlockExamStop">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>580</y>
+     <width>120</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>取消强制停止</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="startExam">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>580</y>
+     <width>120</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开始考试</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

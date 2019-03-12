@@ -17,7 +17,7 @@ void Server::incomingConnection(qintptr handle)
         emit connectStateChange(state);
     });
     QObject::connect(client, &Client::messageRecv, [&](QString message, int clientId) {
-       emit messageRecv(clientId, message);
+       emit messageRecv(clientId, message.trimmed());
     });
     //QObject::connect(client, &Client::destroyed, )
 

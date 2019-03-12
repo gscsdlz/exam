@@ -8,6 +8,7 @@
 #include <QSqlDatabase>
 #include <QMessageBox>
 #include <QVariant>
+#include <QSqlError>
 
 class ORM : public QObject
 {

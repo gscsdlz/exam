@@ -7,6 +7,7 @@ class StudentInfoDao : public DAO
 {
 public:
     StudentInfoDao();
+    QVariant _get(QString);
 };
 
 #endif // STUDENTINFODAO_H

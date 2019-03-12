@@ -2,9 +2,12 @@
 #define DATAFILELOAD_H
 
 #include <QVector>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include "../ExamCommon/examinfodao.h"
 #include "../ExamCommon/studentinfodao.h"
 #include "../ExamCommon/classinfodao.h"
+#include "../ExamCommon/examproblem.h"
 #include "orm.h"
 
 class DataFileLoad
@@ -14,7 +17,8 @@ public:
     QVector<ExamInfoDao> getExamList();
     QVector<ClassInfoDao> getClassList();
     QVector<StudentInfoDao> getStudentInfo(int classId);
-signals:
+    QVector<ExamProblem> getAllProblems(int examId);
+    ExamInfoDao getExamInfo(int);
 
 };
 

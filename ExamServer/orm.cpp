@@ -8,7 +8,8 @@ ORM::ORM(QObject *parent) : QObject(parent)
     QString path = QCoreApplication::applicationDirPath();
     db.setDatabaseName(path + "/exam.db");
     if (!db.open()) {
-        QMessageBox::warning(NULL, QStringLiteral("警告"), QStringLiteral("找不到数据库文件"));
+
+        QMessageBox::warning(NULL, QStringLiteral("警告"), QStringLiteral("找不到数据库文件 error=") + db.lastError().text());
     }
 }
 

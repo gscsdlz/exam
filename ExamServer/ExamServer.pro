@@ -39,7 +39,8 @@ HEADERS  += monitormain.h \
     ../ExamCommon/studentinfodao.h \
     orm.h \
     ../ExamCommon/classinfodao.h \
-    ../ExamCommon/dao.h
+    ../ExamCommon/dao.h \
+    ../ExamCommon/clientstatus.h
 
 FORMS    += monitormain.ui \
     dataconfig.ui

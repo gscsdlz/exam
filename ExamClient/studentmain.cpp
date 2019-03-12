@@ -48,8 +48,7 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
 
     setWindowFlags(windowFlags()&~Qt::WindowMinMaxButtonsHint|Qt::WindowMinimizeButtonHint);
     setFixedSize(this->width(),this->height());
-
-    parseExamJson("eyJleGFtX25hbWUiOiLogIPor5XlkI3np7AiLCJ0ZXN0IjpmYWxzZSwic3RhcnRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDU6MDAiLCJlbmRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDY6MDAiLCJwcm9ibGVtcyI6W3sicHJvX2lkIjoxLCJ0aXRsZSI6IuS7peS4i+ivtOazleato+ehrueahOaYryIsInR5cGUiOjEsIm9wdGlvbnMiOlsiQysr5piv5LiA56eN6ISa5pys6K+t6KiAIiwiUEhQ5piv5LiA56eN57yW6K+R5oCn6K+t6KiAIiwi5rGH57yW6K+t6KiA5ZKM5py65Zmo6K+t6KiA5LiA5LiA5a+55bqUIiwi6L+Z5Liq6YCJ6aG55piv5Zyo57yW5LiN5LiL5Y675LqGIl19LHsicHJvX2lkIjoyLCJ0aXRsZSI6Iua1i+ivleagh+mimDIiLCJ0eXBlIjoyLCJvcHRpb25zIjpbIkEiLCJCIiwiQyIsIkQiXX0seyJwcm9faWQiOjQsInRpdGxlIjoi5rWL6K+V5qCH6aKYMyIsInR5cGUiOjIsIm9wdGlvbnMiOlsiQSIsIkIiLCJDIiwiRCJdfV19");
+    //parseExamJson("eyJleGFtX25hbWUiOiLogIPor5XlkI3np7AiLCJ0ZXN0IjpmYWxzZSwic3RhcnRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDU6MDAiLCJlbmRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDY6MDAiLCJwcm9ibGVtcyI6W3sicHJvX2lkIjoxLCJ0aXRsZSI6IuS7peS4i+ivtOazleato+ehrueahOaYryIsInR5cGUiOjEsIm9wdGlvbnMiOlsiQysr5piv5LiA56eN6ISa5pys6K+t6KiAIiwiUEhQ5piv5LiA56eN57yW6K+R5oCn6K+t6KiAIiwi5rGH57yW6K+t6KiA5ZKM5py65Zmo6K+t6KiA5LiA5LiA5a+55bqUIiwi6L+Z5Liq6YCJ6aG55piv5Zyo57yW5LiN5LiL5Y675LqGIl19LHsicHJvX2lkIjoyLCJ0aXRsZSI6Iua1i+ivleagh+mimDIiLCJ0eXBlIjoyLCJvcHRpb25zIjpbIkEiLCJCIiwiQyIsIkQiXX0seyJwcm9faWQiOjQsInRpdGxlIjoi5rWL6K+V5qCH6aKYMyIsInR5cGUiOjIsIm9wdGlvbnMiOlsiQSIsIkIiLCJDIiwiRCJdfV19");
 }
 
 StudentMain::~StudentMain()
@@ -70,7 +69,11 @@ void StudentMain::handleCmd(int cmdId, QString arg)
     case Command::CLIENT_CAN_SUBMIT:
         ui->submit->show();
         break;
-
+    case Command::CLIENT_STOP_EXAM_FORBID:
+        stopExam();
+        break;
+    case Command::CLIENT_CANCEL_FORBID_STOP:
+        stopExamT->stop();
     }
 }
 
@@ -92,7 +95,7 @@ void StudentMain::parseExamJson(QString str)
     QJsonObject obj = data.object();
 
     QString examName = obj.take("exam_name").toString();
-    if (obj.take("text").toBool()) {
+    if (obj.take("test").toBool()) {
         examName += QStringLiteral("-模拟测试");
     }
     ui->examName->setText(examName);
@@ -106,7 +109,6 @@ void StudentMain::parseExamJson(QString str)
     //设置关联的倒计时
 
     uint currTs = QDateTime::currentDateTime().toTime_t();
-    qDebug() << startTime << " " << endTime << " " << currTs;
     beginExamT->start((startTime - currTs) * 1000);
     stopExamT->start((endTime - currTs) * 1000);
     //解析题目数据
@@ -241,5 +243,20 @@ bool StudentMain::checkSelect()
 void StudentMain::stopExam()
 {
     stopExamT->stop();
-    qDebug() << "stop";
+    QJsonArray result;
+    for (ExamProblem p : problemList) {
+        QJsonObject obj;
+        QJsonArray arr;
+        obj.insert("pro_id", p.getId());
+        QVector<int> ans = p.getAnswer();
+        for (int a : ans) {
+            arr.append(a);
+        }
+        obj.insert("answer", arr);
+        result.append(obj);
+    }
+    QJsonDocument dom;
+    dom.setArray(result);
+    client->sendMessage(command.stringify(Command::CLIENT_SEND_ANSWER, dom.toJson().toBase64()));
+    ui->status->setText(QStringLiteral("已上传答案，等待处理"));
 }
