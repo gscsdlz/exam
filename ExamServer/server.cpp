@@ -14,7 +14,14 @@ void Server::incomingConnection(qintptr handle)
     //QObject::connect(thread, &QThread::started, client, &Client::createObject);
 
     QObject::connect(client, &Client::stateChange, [&](QAbstractSocket::SocketState state) {
-        emit connectStateChange(state);
+        if (state == QAbstractSocket::UnconnectedState) {
+            for (Client *c : socketPool) {
+                if (c->getState() == QAbstractSocket::UnconnectedState) {
+                    emit lostConnect(c->getClientId());
+                    c->deleteLater();
+                }
+            }
+        }
     });
     QObject::connect(client, &Client::messageRecv, [&](QString message, int clientId) {
        emit messageRecv(clientId, message.trimmed());
@@ -55,7 +62,7 @@ bool Server::changeClientId(int newId, int oldId)
         return false;
     } else {
         socketPool[newId] = socketPool[oldId];
-        socketPool[oldId] = NULL;
+        socketPool.remove(oldId);
         socketPool[newId]->setClientId(newId);
 
         if (idKey <= newId) {

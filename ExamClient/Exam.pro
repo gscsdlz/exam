@@ -35,8 +35,5 @@ FORMS    += \
     studentmain.ui \
     initform.ui
 
-DISTFILES += \
-    ../ExamCommon/ExamCommon.pri
-
 RESOURCES += \
     r/r.qrc

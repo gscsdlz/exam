@@ -17,7 +17,7 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     model->setHeaderData(2, Qt::Horizontal, QStringLiteral("学号"));
     model->setHeaderData(3, Qt::Horizontal, QStringLiteral("班级"));
     model->setHeaderData(4, Qt::Horizontal, QStringLiteral("性别"));
-    model->setHeaderData(5, Qt::Horizontal, QStringLiteral("考试状态"));
+    model->setHeaderData(5, Qt::Horizontal, QStringLiteral("状态"));
 
     ui->clientTable->setModel(model);
 }
@@ -100,11 +100,9 @@ void MonitorMain::checkLogin(int clientId, QString str)
 {
     QStringList arr = str.split(",");
     QString username = arr.at(0);
-    qDebug() << arr;
     QString password = QCryptographicHash::hash(arr.at(1).toUtf8(), QCryptographicHash::Md5).toHex();
     bool correct = false;
     for (StudentInfoDao item : studentList) {
-        qDebug() << item._get("student_id") << " " << item._get("password") << " " << username << " " << password;
         if (item._get("student_id").toString() == username && item._get("password").toString() == password) {
             if (loginVis[item._get("student_id").toString()]) {
                 server->sendMessage(clientId, cmd.stringify(Command::CLIENT_HAS_LOGIN, "1"));
@@ -115,6 +113,7 @@ void MonitorMain::checkLogin(int clientId, QString str)
             model->item(row, 2)->setText(item._get("student_id").toString());
             model->item(row, 3)->setText(item._get("class_name").toString());
             model->item(row, 4)->setText(item._get("str_sex").toString());
+            model->item(row, 5)->setText(QStringLiteral("已登录"));
 
             loginVis[item._get("student_id").toString()] = true;
             correct = true;
@@ -131,7 +130,6 @@ void MonitorMain::setExamAndClass(int e, int c)
 {
     examId = e;
     classId = c;
-    DataFileLoad load;
     studentList = load.getStudentInfo(classId);
     ui->status->setText(QStringLiteral("载入数据成功，等待客户端连接"));
 
@@ -143,9 +141,20 @@ void MonitorMain::setExamAndClass(int e, int c)
     this->show();
 }
 
+void MonitorMain::handleLostConnect(int clientId)
+{
+    int row = clientRow[clientId];
+    if (loginVis[model->item(row, 2)->text()] == false) {
+        model->removeRow(row);
+    } else {
+        model->item(row, 5)->setText(QStringLiteral("已掉线"));
+    }
+}
+
 void MonitorMain::changeClientId(int oldId, int newId)
 {
     if (server->changeClientId(newId, oldId)) {
+        model->item(clientRow[oldId], 0)->setText(QString::number(newId));
         server->sendMessage(newId, cmd.stringify(Command::SERVER_HAS_CONFIRM_ID, QString::number(newId)));
     } else {
         server->sendMessage(oldId, cmd.stringify(Command::SERVER_HAS_REJECT_ID, "1"));
@@ -154,15 +163,14 @@ void MonitorMain::changeClientId(int oldId, int newId)
 
 void MonitorMain::dispatcherProblems(int clientId)
 {
-    DataFileLoad load;
     QVector<ExamProblem> result =  load.getAllProblems(this->examId);
     ExamInfoDao exam = load.getExamInfo(this->examId);
 
     QJsonObject mainObj;
     mainObj.insert("exam_name", exam._get("exam_name").toString());
     mainObj.insert("test", false);
-    mainObj.insert("start_time", exam._get("str_start_time").toString());
-    mainObj.insert("end_time", exam._get("str_end_time").toString());
+    mainObj.insert("start_time", exam._get("start_time").toString());
+    mainObj.insert("end_time", exam._get("end_time").toString());
 
     QJsonArray problems;
     for (int i = 0; i < result.length(); i++) {
@@ -184,6 +192,7 @@ void MonitorMain::dispatcherProblems(int clientId)
     j.setObject(mainObj);
     QByteArray res = j.toJson().toBase64();
     server->sendMessage(clientId, cmd.stringify(Command::CURR_EXAM_INFO, res));
+    model->item(clientRow[clientId], 5)->setText(QStringLiteral("已下发试卷"));
 }
 
 QVector<int> MonitorMain::getSelectedClient()
@@ -230,27 +239,60 @@ void MonitorMain::handleStatus(int clientId, int statusType)
 
 void MonitorMain::collectAnswer(int clientId, QString str)
 {
-    qDebug() << str;
-//    QJsonDocument dom = QJsonDocument::fromJson(str.toLatin1());
-//    QJsonArray arr = dom.array();
+      int row = clientRow[clientId];
+      QString studentId = model->item(row, 2)->text();
 
-//    QVector<QVector<int>> result;
-//    for (int i = 0; i < arr.count(); i++) {
-//        QJsonObject obj = arr.at(i).toObject();
-//        QVector<int> t;
+      int id = 0;
+      for(StudentInfoDao s : studentList) {
+          if (s._get("student_id").toString() == studentId) {
+              id = s._get("id").toInt();
+              break;
+          }
+      }
+      if (id != 0) {
+        if (load.saveAnswerInfo(id, examId, QByteArray::fromBase64(str.toUtf8()))) {
+            model->item(row, 5)->setText(QStringLiteral("已收到答案"));
+        }
+      } else {
 
-//        t.push_back(obj.take("pro_id").toInt());
-//        QJsonArray ans = obj.take("answers").toArray();
-//        for (int j = 0; j < ans.size(); j++) {
-//            t.push_back(ans.at(i).toInt());
-//        }
-//        result.push_back(t);
-//    }
+      }
+}
 
+void MonitorMain::checkAnswer()
+{
+    QString str;
+    QJsonDocument dom = QJsonDocument::fromJson(str.toLatin1());
+    QJsonArray arr = dom.array();
 
+    QVector<QVector<int>> result;
+    for (int i = 0; i < arr.count(); i++) {
+        QJsonObject obj = arr.at(i).toObject();
+        QVector<int> t;
+
+        t.push_back(obj.take("pro_id").toInt());
+        QJsonArray ans = obj.take("answers").toArray();
+        for (int j = 0; j < ans.size(); j++) {
+            t.push_back(ans.at(i).toInt());
+        }
+        result.push_back(t);
+    }
 }
 
 void MonitorMain::on_startExam_clicked()
 {
     sendCmd(cmd.stringify(Command::CLIENT_START_EXAM, "1"));
+}
+
+void MonitorMain::on_selectAll_clicked()
+{
+    for(int i = 0; i < model->rowCount(); i++) {
+        model->item(i, 0)->setCheckState(Qt::Checked);
+    }
+}
+
+void MonitorMain::on_unSelect_clicked()
+{
+    for(int i = 0; i < model->rowCount(); i++) {
+        model->item(i, 0)->setCheckState(Qt::Unchecked);
+    }
 }

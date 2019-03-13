@@ -111,4 +111,38 @@ ExamInfoDao DataFileLoad::getExamInfo(int examId)
     return dao;
 }
 
+bool DataFileLoad::updateExamInfo(int id, QString name, QString st, QString et)
+{
+    ORM *db = ORM::getInstance();
+    QVector<QVariant> args;
+    args.push_back(name);
+    args.push_back(st);
+    args.push_back(et);
+    args.push_back(id);
+    int row = db->execute("UPDATE exam_info SET exam_name = ?, start_time = ?, end_time = ? WHERE id = ?", args);
+    return row > 0;
+}
 
+bool DataFileLoad::updateClassInfo(int id, QString name)
+{
+    ORM *db = ORM::getInstance();
+    QVector<QVariant> args;
+    args.push_back(name);
+    args.push_back(id);
+
+    int row = db->execute("UPDATE class_info SET class_name = ? WHERE id = ?", args);
+    return row > 0;
+}
+
+bool DataFileLoad::saveAnswerInfo(int studentId, int examId, QString ansStr)
+{
+    ORM *db = ORM::getInstance();
+    QVector<QVariant> args;
+    args.append(studentId);
+    args.append(examId);
+    args.append(ansStr);
+
+    int insertId = db->execute("INSERT INTO answer_result (student_id, exam_id, ans_str) VALUES (?,?,?)", args);
+
+    return insertId > 0;
+}

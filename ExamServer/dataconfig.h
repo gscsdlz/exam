@@ -21,11 +21,13 @@ public:
     explicit DataConfig(QWidget *parent = 0);
     ~DataConfig();
 protected:
-    void generateExamItem(QString, int, int);
-    void generateClassItem(QString, int, int);
+    void generateExamItem(QString, int, int, bool = false);
+    void generateClassItem(QString, int, int, bool = false);
 public slots:
     void setExamSelected(QModelIndex);
     void setClassSelected(QModelIndex);
+    void updateExamInfo(QModelIndex, QModelIndex, QVector<int>);
+    void updateClassInfo(QModelIndex, QModelIndex, QVector<int>);
 private slots:
     void on_start_clicked();
     void on_exit_clicked();

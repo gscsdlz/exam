@@ -19,7 +19,7 @@ protected:
     QThread *getNewThread();
 signals:
     void messageRecv(int, QString);
-    void connectStateChange(QAbstractSocket::SocketState);
+    void lostConnect(int);
     void newClientIn(int);
 public slots:
     void sendMessage(int, QString);

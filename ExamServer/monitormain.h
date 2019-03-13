@@ -17,6 +17,7 @@
 #include "../ExamCommon/configloader.h"
 #include "../ExamCommon/examproblem.h"
 #include "../ExamCommon/clientstatus.h"
+#include "../ExamCommon/answerinfo.h"
 #include "datafileload.h"
 
 namespace Ui {
@@ -35,6 +36,7 @@ public:
     void dispatcherProblems(int);
     void handleStatus(int, int);
     void collectAnswer(int, QString);
+    void checkAnswer();
 protected:
     void sendCmd(QString);
     QVector<int> getSelectedClient();
@@ -42,6 +44,8 @@ public slots:
     void setExamAndClass(int, int);
     void handleMessage(int, QString, int);
     void addClient(int);
+    void handleLostConnect(int);
+
 private slots:
     void on_orderMode_clicked();
     void on_startLogin_clicked();
@@ -49,6 +53,10 @@ private slots:
     void on_unlockLogin_clicked();
     void on_unlockExamStop_clicked();
     void on_startExam_clicked();
+
+    void on_selectAll_clicked();
+
+    void on_unSelect_clicked();
 
 signals:
     void sendCtlMsg(int, QString);
@@ -62,6 +70,7 @@ private:
     QVector<StudentInfoDao> studentList;
     QMap<int, int> clientRow;
     QMap<QString, bool> loginVis;
+    DataFileLoad load;
 };
 
 #endif // MONITORMAIN_H

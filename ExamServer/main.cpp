@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     QObject::connect(server, &Server::messageRecv, [&](int clientId, QString message) {
         cmd.parseCommand(message, clientId);
     });
+    QObject::connect(server, &Server::lostConnect, &w, &MonitorMain::handleLostConnect);
     QObject::connect(&cmd, &Command::monitorMainSignals, &w, &MonitorMain::handleMessage);
     return a.exec();
 }

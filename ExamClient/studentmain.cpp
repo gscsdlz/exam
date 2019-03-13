@@ -111,6 +111,7 @@ void StudentMain::parseExamJson(QString str)
     uint currTs = QDateTime::currentDateTime().toTime_t();
     beginExamT->start((startTime - currTs) * 1000);
     stopExamT->start((endTime - currTs) * 1000);
+    showSubmitT->start((endTime - startTime) / 2 * 1000);
     //解析题目数据
     QJsonArray problems = obj.take("problems").toArray();
     for (int i = 0; i < problems.size(); i++) {
@@ -242,6 +243,19 @@ bool StudentMain::checkSelect()
 
 void StudentMain::stopExam()
 {
+    ui->wait->show();
+
+    ui->nextProblem->hide();
+    ui->listWidget->hide();
+    ui->title->hide();
+    ui->mask->hide();
+    for (QRadioButton *item : radioOptions) {
+        item->hide();
+    }
+    for (QCheckBox *item : checkOptions) {
+        item->hide();
+    }
+
     stopExamT->stop();
     QJsonArray result;
     for (ExamProblem p : problemList) {

@@ -13,41 +13,63 @@
   <property name="font">
    <font>
     <family>微软雅黑</family>
-    <pointsize>10</pointsize>
+    <pointsize>12</pointsize>
    </font>
   </property>
   <property name="windowTitle">
    <string>MonitorMain</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+  </property>
   <widget class="QLabel" name="status">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>200</x>
      <y>685</y>
      <width>800</width>
      <height>15</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QTableView" name="clientTable">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>50</y>
+     <y>20</y>
      <width>960</width>
-     <height>500</height>
+     <height>400</height>
     </rect>
    </property>
   </widget>
   <widget class="QPushButton" name="startLogin">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>580</y>
-     <width>120</width>
+     <x>150</x>
+     <y>490</y>
+     <width>100</width>
      <height>40</height>
     </rect>
    </property>
@@ -58,9 +80,9 @@
   <widget class="QPushButton" name="exitExam">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>580</y>
-     <width>120</width>
+     <x>280</x>
+     <y>550</y>
+     <width>100</width>
      <height>40</height>
     </rect>
    </property>
@@ -72,21 +94,21 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>580</y>
-     <width>120</width>
+     <y>490</y>
+     <width>100</width>
      <height>40</height>
     </rect>
    </property>
    <property name="text">
-    <string>进入编号模式</string>
+    <string>编号模式</string>
    </property>
   </widget>
   <widget class="QPushButton" name="unlockLogin">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>580</y>
-     <width>120</width>
+     <x>150</x>
+     <y>550</y>
+     <width>100</width>
      <height>40</height>
     </rect>
    </property>
@@ -97,8 +119,8 @@
   <widget class="QPushButton" name="unlockExamStop">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>580</y>
+     <x>410</x>
+     <y>490</y>
      <width>120</width>
      <height>40</height>
     </rect>
@@ -110,14 +132,53 @@
   <widget class="QPushButton" name="startExam">
    <property name="geometry">
     <rect>
-     <x>750</x>
-     <y>580</y>
-     <width>120</width>
+     <x>280</x>
+     <y>490</y>
+     <width>100</width>
      <height>40</height>
     </rect>
    </property>
    <property name="text">
     <string>开始考试</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="selectAll">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>430</y>
+     <width>60</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>全选</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>490</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>判题</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="unSelect">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>430</y>
+     <width>100</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>取消全选</string>
    </property>
   </widget>
  </widget>

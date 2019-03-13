@@ -31,9 +31,9 @@ DataConfig::DataConfig(QWidget *parent) :
     for (int i = 0; i < examLists.length(); i++) {
 
         generateExamItem(examLists[i]._get("id").toString(), i, 0);
-        generateExamItem(examLists[i]._get("exam_name").toString(), i, 1);
-        generateExamItem(examLists[i]._get("str_start_time").toString(), i, 2);
-        generateExamItem(examLists[i]._get("str_end_time").toString(), i, 3);
+        generateExamItem(examLists[i]._get("exam_name").toString(), i, 1, true);
+        generateExamItem(examLists[i]._get("start_time").toString(), i, 2, true);
+        generateExamItem(examLists[i]._get("end_time").toString(), i, 3, true);
 
         QStandardItem *item = new QStandardItem(QIcon(":r/init.png"), "");
         item->setEditable(false);
@@ -44,7 +44,7 @@ DataConfig::DataConfig(QWidget *parent) :
     for (int i = 0; i < classLists.length(); i++) {
 
         generateClassItem(classLists[i]._get("id").toString(), i, 0);
-        generateClassItem(classLists[i]._get("class_name").toString(), i, 1);
+        generateClassItem(classLists[i]._get("class_name").toString(), i, 1, true);
         generateClassItem(classLists[i]._get("number").toString(), i, 2);
         QStandardItem *item = new QStandardItem(QIcon(":r/init.png"), "");
         item->setEditable(false);
@@ -54,6 +54,8 @@ DataConfig::DataConfig(QWidget *parent) :
 
     QObject::connect(ui->examTable, &QTableView::clicked, this, &DataConfig::setExamSelected);
     QObject::connect(ui->classTable, &QTableView::clicked, this, &DataConfig::setClassSelected);
+    QObject::connect(classModel, &QStandardItemModel::dataChanged, this, &DataConfig::updateClassInfo);
+    QObject::connect(examModel, &QStandardItemModel::dataChanged, this, &DataConfig::updateExamInfo);
 
     ui->examTable->setModel(examModel);
 //    ui->examTable->setColumnWidth(0, 40);
@@ -75,18 +77,18 @@ DataConfig::~DataConfig()
     delete ui;
 }
 
-void DataConfig::generateExamItem(QString str, int row, int col)
+void DataConfig::generateExamItem(QString str, int row, int col, bool edit)
 {
     QStandardItem *item = new QStandardItem(str);
-    item->setEditable(false);
+    item->setEditable(edit);
     item->setSelectable(false);
     examModel->setItem(row, col, item);
 }
 
-void DataConfig::generateClassItem(QString str, int row, int col)
+void DataConfig::generateClassItem(QString str, int row, int col, bool edit)
 {
     QStandardItem *item = new QStandardItem(str);
-    item->setEditable(false);
+    item->setEditable(edit);
     item->setSelectable(false);
     classModel->setItem(row, col, item);
 }
@@ -128,4 +130,30 @@ void DataConfig::on_start_clicked()
 void DataConfig::on_exit_clicked()
 {
     this->close();
+}
+
+void DataConfig::updateExamInfo(QModelIndex idx1, QModelIndex, QVector<int>)
+{
+    if (idx1.column() >= 1 && idx1.column() <= 3) {
+        int row = idx1.row();
+
+        load.updateExamInfo(
+            examModel->item(row, 0)->text().toInt(),
+            examModel->item(row, 1)->text(),
+            examModel->item(row, 2)->text(),
+            examModel->item(row, 3)->text()
+        );
+    }
+}
+
+void DataConfig::updateClassInfo(QModelIndex idx1, QModelIndex, QVector<int>)
+{
+    if (idx1.column() == 1) {
+        int row = idx1.row();
+
+        load.updateClassInfo(
+            classModel->item(row, 0)->text().toInt(),
+            classModel->item(row, 1)->text()
+        );
+    }
 }
