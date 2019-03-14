@@ -54,8 +54,8 @@ void MonitorMain::addClient(int clientId)
     QStandardItem *item = new QStandardItem(QString::number(clientId));
     item->setCheckable(true);
     int row = model->rowCount();
-    model->setItem(row, 0, item);
     clientRow[clientId] = row;
+    model->setItem(row, 0, item);
 
     for (int i = 1; i < 6; i++) {
         QStandardItem *item = new QStandardItem();
@@ -76,19 +76,6 @@ void MonitorMain::on_exitExam_clicked()
 void MonitorMain::on_startLogin_clicked()
 {
     sendCmd(cmd.stringify(Command::CLIENT_CAN_LOGIN, "1"));
-}
-
-void MonitorMain::on_unlockLogin_clicked()
-{
-    QVector<int> res = getSelectedClient();
-    if(res.length() == 1 && res[0] == -1) {
-        loginVis.clear();
-    } else {
-        for(int id : res) {
-            int row = clientRow[id];
-            loginVis[model->item(row, 2)->text()] = false;
-        }
-    }
 }
 
 void MonitorMain::on_unlockExamStop_clicked()
@@ -154,8 +141,17 @@ void MonitorMain::handleLostConnect(int clientId)
 void MonitorMain::changeClientId(int oldId, int newId)
 {
     if (server->changeClientId(newId, oldId)) {
-        model->item(clientRow[oldId], 0)->setText(QString::number(newId));
-        server->sendMessage(newId, cmd.stringify(Command::SERVER_HAS_CONFIRM_ID, QString::number(newId)));
+
+        int row = clientRow[newId];
+        if (model->item(row, 5)->text() == QStringLiteral("已掉线")){
+            model->item(row, 5)->setText(QStringLiteral("已恢复"));
+            model->removeRow(clientRow[oldId]);
+            server->sendMessage(newId, cmd.stringify(Command::CLIENT_LOGIN_SUCCESS, "1"));
+        } else {
+            clientRow[newId] = clientRow[oldId];
+            model->item(clientRow[oldId], 0)->setText(QString::number(newId));
+            server->sendMessage(newId, cmd.stringify(Command::SERVER_HAS_CONFIRM_ID, QString::number(newId)));
+        }
     } else {
         server->sendMessage(oldId, cmd.stringify(Command::SERVER_HAS_REJECT_ID, "1"));
     }
@@ -200,7 +196,7 @@ QVector<int> MonitorMain::getSelectedClient()
     QVector<int> ids;
     for (int i = 0; i < model->rowCount(); i++) {
         QStandardItem *item = model->item(i, 0);
-        if (item->checkState() == Qt::Checked) {
+        if (item->checkState() == Qt::Checked && model->item(i, 5)->text() != QStringLiteral("已掉线")) {
             ids.push_back(item->text().toInt());
         }
     }
@@ -258,7 +254,26 @@ void MonitorMain::collectAnswer(int clientId, QString str)
       }
 }
 
-void MonitorMain::checkAnswer()
+void MonitorMain::on_startExam_clicked()
+{
+    sendCmd(cmd.stringify(Command::CLIENT_START_EXAM, "1"));
+}
+
+void MonitorMain::on_selectAll_clicked()
+{
+    for(int i = 0; i < model->rowCount(); i++) {
+        model->item(i, 0)->setCheckState(Qt::Checked);
+    }
+}
+
+void MonitorMain::on_unSelect_clicked()
+{
+    for(int i = 0; i < model->rowCount(); i++) {
+        model->item(i, 0)->setCheckState(Qt::Unchecked);
+    }
+}
+
+void MonitorMain::on_checkAnswer_clicked()
 {
     QString str;
     QJsonDocument dom = QJsonDocument::fromJson(str.toLatin1());
@@ -278,21 +293,7 @@ void MonitorMain::checkAnswer()
     }
 }
 
-void MonitorMain::on_startExam_clicked()
+void MonitorMain::on_closeClient_clicked()
 {
-    sendCmd(cmd.stringify(Command::CLIENT_START_EXAM, "1"));
-}
-
-void MonitorMain::on_selectAll_clicked()
-{
-    for(int i = 0; i < model->rowCount(); i++) {
-        model->item(i, 0)->setCheckState(Qt::Checked);
-    }
-}
-
-void MonitorMain::on_unSelect_clicked()
-{
-    for(int i = 0; i < model->rowCount(); i++) {
-        model->item(i, 0)->setCheckState(Qt::Unchecked);
-    }
+    sendCmd(cmd.stringify(Command::CLIENT_MUST_EXIT, "1"));
 }

@@ -19,7 +19,14 @@ SOURCES += main.cpp\
     ../ExamCommon/client.cpp \
     ../ExamCommon/command.cpp \
     ../ExamCommon/configloader.cpp \
-    ../ExamCommon/examproblem.cpp
+    ../ExamCommon/examproblem.cpp \
+    ../ExamCommon/answerinfo.cpp \
+    ../ExamCommon/classinfodao.cpp \
+    ../ExamCommon/dao.cpp \
+    ../ExamCommon/examinfodao.cpp \
+    ../ExamCommon/studentinfodao.cpp \
+    ../ExamCommon/orm.cpp \
+    localcache.cpp
 
 HEADERS  += \
     settingdialog.h \
@@ -28,7 +35,15 @@ HEADERS  += \
     ../ExamCommon/client.h \
     ../ExamCommon/command.h \
     ../ExamCommon/configloader.h \
-    ../ExamCommon/examproblem.h
+    ../ExamCommon/examproblem.h \
+    ../ExamCommon/answerinfo.h \
+    ../ExamCommon/classinfodao.h \
+    ../ExamCommon/clientstatus.h \
+    ../ExamCommon/dao.h \
+    ../ExamCommon/examinfodao.h \
+    ../ExamCommon/studentinfodao.h \
+    ../ExamCommon/orm.h \
+    localcache.h
 
 FORMS    += \
     settingdialog.ui \

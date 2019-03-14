@@ -9,6 +9,8 @@ class Command : public QObject
 public:
     //指令列表
     enum CommandList {
+        CLIENT_MUST_EXIT =  1,          //
+
         //服务端下行告知initForm的指令 1xx
         CLIENT_ENTER_ORDER_MODE = 101,  //客户端进入配置ID模式
         SERVER_HAS_CONFIRM_ID = 102,    //服务端认可客户端上传的ID

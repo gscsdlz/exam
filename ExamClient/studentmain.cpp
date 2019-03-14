@@ -48,7 +48,6 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
 
     setWindowFlags(windowFlags()&~Qt::WindowMinMaxButtonsHint|Qt::WindowMinimizeButtonHint);
     setFixedSize(this->width(),this->height());
-    //parseExamJson("eyJleGFtX25hbWUiOiLogIPor5XlkI3np7AiLCJ0ZXN0IjpmYWxzZSwic3RhcnRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDU6MDAiLCJlbmRfdGltZSI6IjIwMTktMDMtMDIgMTg6MDY6MDAiLCJwcm9ibGVtcyI6W3sicHJvX2lkIjoxLCJ0aXRsZSI6IuS7peS4i+ivtOazleato+ehrueahOaYryIsInR5cGUiOjEsIm9wdGlvbnMiOlsiQysr5piv5LiA56eN6ISa5pys6K+t6KiAIiwiUEhQ5piv5LiA56eN57yW6K+R5oCn6K+t6KiAIiwi5rGH57yW6K+t6KiA5ZKM5py65Zmo6K+t6KiA5LiA5LiA5a+55bqUIiwi6L+Z5Liq6YCJ6aG55piv5Zyo57yW5LiN5LiL5Y675LqGIl19LHsicHJvX2lkIjoyLCJ0aXRsZSI6Iua1i+ivleagh+mimDIiLCJ0eXBlIjoyLCJvcHRpb25zIjpbIkEiLCJCIiwiQyIsIkQiXX0seyJwcm9faWQiOjQsInRpdGxlIjoi5rWL6K+V5qCH6aKYMyIsInR5cGUiOjIsIm9wdGlvbnMiOlsiQSIsIkIiLCJDIiwiRCJdfV19");
 }
 
 StudentMain::~StudentMain()
@@ -74,6 +73,10 @@ void StudentMain::handleCmd(int cmdId, QString arg)
         break;
     case Command::CLIENT_CANCEL_FORBID_STOP:
         stopExamT->stop();
+        break;
+    case Command::CLIENT_MUST_EXIT:
+        close();
+        break;
     }
 }
 
@@ -83,7 +86,10 @@ void StudentMain::initExam()
         return;
     }
     this->show();
-    client->sendMessage(command.stringify(Command::CLIENT_APPLY_EXAM_INFO, "0"));
+    //检查本地存储 如果有直接使用
+    if (!restoreData()) {
+        client->sendMessage(command.stringify(Command::CLIENT_APPLY_EXAM_INFO, "0"));
+    }
 }
 
 //解析服务端发送过来的JSON对象
@@ -111,7 +117,7 @@ void StudentMain::parseExamJson(QString str)
     uint currTs = QDateTime::currentDateTime().toTime_t();
     beginExamT->start((startTime - currTs) * 1000);
     stopExamT->start((endTime - currTs) * 1000);
-    showSubmitT->start((endTime - startTime) / 2 * 1000);
+    showSubmitT->start((startTime + (endTime - startTime) / 2) * 1000);
     //解析题目数据
     QJsonArray problems = obj.take("problems").toArray();
     for (int i = 0; i < problems.size(); i++) {
@@ -249,6 +255,8 @@ void StudentMain::stopExam()
     ui->listWidget->hide();
     ui->title->hide();
     ui->mask->hide();
+    ui->submit->hide();
+
     for (QRadioButton *item : radioOptions) {
         item->hide();
     }
@@ -273,4 +281,28 @@ void StudentMain::stopExam()
     dom.setArray(result);
     client->sendMessage(command.stringify(Command::CLIENT_SEND_ANSWER, dom.toJson().toBase64()));
     ui->status->setText(QStringLiteral("已上传答案，等待处理"));
+}
+
+bool StudentMain::restoreData()
+{
+    QString exam = cache.getExam();
+    if (exam.length() == 0) {
+        return false;
+    } else {
+        parseExamJson(exam);
+        QVector<AnswerInfo> result = cache.getAnswers();
+        for(AnswerInfo a : result) {
+            QStringList arr = a._get("ans").toString().split(",");
+            QVector<int> ans;
+            for(QString key : arr) {
+               ans.append(key.toInt());
+            }
+            if (!ans.empty()) {
+                listItem[a._get("pro_id").toInt()]->setIcon(QIcon(":/ok.png"));
+            } else {
+                listItem[a._get("pro_id").toInt()]->setIcon(QIcon(":/init.png"));
+            }
+            problemList[a._get("pro_id").toInt()].appendAnswer(ans);
+        }
+    }
 }

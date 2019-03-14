@@ -50,13 +50,12 @@ private slots:
     void on_orderMode_clicked();
     void on_startLogin_clicked();
     void on_exitExam_clicked();
-    void on_unlockLogin_clicked();
     void on_unlockExamStop_clicked();
     void on_startExam_clicked();
-
     void on_selectAll_clicked();
-
-    void on_unSelect_clicked();
+    void on_unSelect_clicked();    
+    void on_checkAnswer_clicked();
+    void on_closeClient_clicked();
 
 signals:
     void sendCtlMsg(int, QString);

@@ -13,6 +13,7 @@
 #include "../ExamCommon/client.h"
 #include "../ExamCommon/command.h"
 #include "../ExamCommon/examproblem.h"
+#include "localcache.h"
 #include <QMessageBox>
 #include <QListWidgetItem>
 
@@ -30,6 +31,7 @@ public:
     void parseExamJson(QString);
     void nextProblem();
     bool checkSelect();
+    bool restoreData();
 public slots:
     void startExam();
     void stopExam();
@@ -57,6 +59,7 @@ private:
     QVector<QRadioButton *> radioOptions;   //单选按钮组
     QVector<QCheckBox *> checkOptions;      //多选按钮组
     int currIdx = 0;                        //当前正在作答的题目
+    LocalCache cache;
 };
 
 #endif // STUDENTMAIN_H

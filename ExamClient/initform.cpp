@@ -133,6 +133,9 @@ void InitForm::handleCmd(int cmdId, QString arg)
         hide();
         emit openStudentMain();
         break;
+    case Command::CLIENT_MUST_EXIT:
+        close();
+        break;
     default:
         break;
     }

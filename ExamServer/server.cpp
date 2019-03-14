@@ -15,11 +15,17 @@ void Server::incomingConnection(qintptr handle)
 
     QObject::connect(client, &Client::stateChange, [&](QAbstractSocket::SocketState state) {
         if (state == QAbstractSocket::UnconnectedState) {
-            for (Client *c : socketPool) {
-                if (c->getState() == QAbstractSocket::UnconnectedState) {
+            QVector<int> mustDel;
+            for (auto it = socketPool.begin(); it != socketPool.end(); it++) {
+                Client *c = it.value();
+                if (c != NULL && c->getState() == QAbstractSocket::UnconnectedState) {
                     emit lostConnect(c->getClientId());
+                    mustDel.append(it.key());
                     c->deleteLater();
                 }
+            }
+            for (int k :mustDel) {
+                socketPool.remove(k);
             }
         }
     });
@@ -52,7 +58,7 @@ void Server::sendMessage(int clientId, QString message)
             }
         }
     } else {
-        socketPool[clientId]->sendMessage(message);
+       socketPool[clientId]->sendMessage(message);
     }
 }
 
