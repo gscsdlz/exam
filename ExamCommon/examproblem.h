@@ -12,21 +12,20 @@ public:
     explicit ExamProblem();
     void setVarInfo(int, QString, int);
     void appendOptions(QString);
-    void appendAnswer(int);
-    void appendAnswer(QVector<int>);
-    void debug();
+    void setAnswer(int);
 
+    void debug();
     int getType();
     int getId();
     QString getTitle();
     QVector<QString> getOptions();
-    QVector<int> getAnswer();
+    int getAnswer();
 private:
     int id;
     QString title;
     int type;
     QVector<QString> options;
-    QVector<int> answer;
+    int answer;
 };
 
 #endif // EXAMPROBLEM_H

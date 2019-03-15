@@ -19,8 +19,9 @@ public:
     QVector<ClassInfoDao> getClassList();
     QVector<StudentInfoDao> getStudentInfo(int classId);
     QVector<ExamProblem> getAllProblems(int examId);
-    QVector<AnswerInfo> getAllAnswer(int);
+    QVector<AnswerInfo> getAllAnswer(int, int);
     ExamInfoDao getExamInfo(int);
+    int getProblemAnswer(int);
 
     bool updateExamInfo(int, QString, QString, QString);
     bool updateClassInfo(int, QString);

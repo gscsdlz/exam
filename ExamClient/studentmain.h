@@ -42,7 +42,8 @@ public slots:
 private slots:
     void on_nextProblem_clicked();
     void on_listWidget_clicked(const QModelIndex &index);
-
+signals:
+    void saveAnswer(int,int);
 private:
     Ui::StudentMain *ui;
     Client *client;         //底层TCP对象
@@ -60,6 +61,7 @@ private:
     QVector<QCheckBox *> checkOptions;      //多选按钮组
     int currIdx = 0;                        //当前正在作答的题目
     LocalCache cache;
+    bool canWrite;
 };
 
 #endif // STUDENTMAIN_H

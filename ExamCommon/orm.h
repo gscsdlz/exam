@@ -1,6 +1,7 @@
 ﻿#ifndef ORM_H
 #define ORM_H
 
+#include <QDebug>
 #include <QCoreApplication>
 #include <QObject>
 #include <QVector>

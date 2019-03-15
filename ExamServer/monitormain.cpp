@@ -235,23 +235,23 @@ void MonitorMain::handleStatus(int clientId, int statusType)
 
 void MonitorMain::collectAnswer(int clientId, QString str)
 {
-      int row = clientRow[clientId];
-      QString studentId = model->item(row, 2)->text();
+    int row = clientRow[clientId];
+    QString studentId = model->item(row, 2)->text();
 
-      int id = 0;
-      for(StudentInfoDao s : studentList) {
-          if (s._get("student_id").toString() == studentId) {
-              id = s._get("id").toInt();
-              break;
-          }
+    int id = 0;
+    for(StudentInfoDao s : studentList) {
+      if (s._get("student_id").toString() == studentId) {
+          id = s._get("id").toInt();
+          break;
       }
-      if (id != 0) {
+    }
+    if (id != 0) {
         if (load.saveAnswerInfo(id, examId, QByteArray::fromBase64(str.toUtf8()))) {
             model->item(row, 5)->setText(QStringLiteral("已收到答案"));
         }
-      } else {
+    } else {
 
-      }
+    }
 }
 
 void MonitorMain::on_startExam_clicked()
@@ -275,21 +275,21 @@ void MonitorMain::on_unSelect_clicked()
 
 void MonitorMain::on_checkAnswer_clicked()
 {
-    QString str;
-    QJsonDocument dom = QJsonDocument::fromJson(str.toLatin1());
-    QJsonArray arr = dom.array();
+    QVector<AnswerInfo> result = load.getAllAnswer(examId, classId);
+    for (AnswerInfo info : result) {
+        QJsonDocument dom = QJsonDocument::fromJson(info._get("ans_str").toString().toLatin1());
+        QJsonArray arr = dom.array();
 
-    QVector<QVector<int>> result;
-    for (int i = 0; i < arr.count(); i++) {
-        QJsonObject obj = arr.at(i).toObject();
-        QVector<int> t;
 
-        t.push_back(obj.take("pro_id").toInt());
-        QJsonArray ans = obj.take("answers").toArray();
-        for (int j = 0; j < ans.size(); j++) {
-            t.push_back(ans.at(i).toInt());
+        for (int i = 0; i < arr.count(); i++) {
+            QJsonObject obj = arr.at(i).toObject();
+            int proId = obj.take("pro_id").toInt();
+            int userAns = obj.take("answer").toInt();
+            int correctAns = load.getProblemAnswer(proId);
+            if (userAns == correctAns) {
+
+            }
         }
-        result.push_back(t);
     }
 }
 

@@ -5,7 +5,10 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
     QMainWindow(parent),
     ui(new Ui::StudentMain)
 {
+    canWrite = true;
     client = c;
+    cache.start();
+
     ui->setupUi(this);
     ui->submit->hide();
     ui->nextProblem->hide();
@@ -48,10 +51,14 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
 
     setWindowFlags(windowFlags()&~Qt::WindowMinMaxButtonsHint|Qt::WindowMinimizeButtonHint);
     setFixedSize(this->width(),this->height());
+
+    QObject::connect(this, &StudentMain::saveAnswer, &cache, &LocalCache::setAnswer);
 }
 
 StudentMain::~StudentMain()
 {
+    cache.terminate();
+    cache.wait();
     delete ui;
 }
 
@@ -129,6 +136,7 @@ void StudentMain::parseExamJson(QString str)
         for (int j = 0; j < options.size(); j++) {
             p.appendOptions(options.at(j).toString());
         }
+        p.setAnswer(0);
         problemList.append(p);
 
         QListWidgetItem *item = new QListWidgetItem;
@@ -137,6 +145,7 @@ void StudentMain::parseExamJson(QString str)
         listItem.append(item);
         ui->listWidget->addItem(item);
     }
+    cache.setExam(str);
 }
 
 //开始考试 初始化界面
@@ -156,10 +165,11 @@ void StudentMain::startExam()
 //切换到下一题
 void StudentMain::nextProblem()
 {
+    canWrite = false;
     ExamProblem p = problemList[currIdx];
     ui->title->setText(p.getTitle());
     QVector<QString> options = p.getOptions();
-    QVector<int> answer = p.getAnswer();
+    int answer = p.getAnswer();
     if (p.getType() == 1) {
         //单选
         for (int i = 0; i < 4; i++) {
@@ -167,8 +177,10 @@ void StudentMain::nextProblem()
             radioOptions[i]->setText(options[i]);
             radioOptions[i]->show();
         }
-        if (!answer.empty()) {
-            radioOptions[answer[0]]->setChecked(true);
+        for (int i = 0; i < 4; i++) {
+            if ((answer >> i) & 1 == 1) {
+                radioOptions[i]->setChecked(true);
+            }
         }
     } else {
         for (int i = 0; i < 4; i++) {
@@ -177,10 +189,14 @@ void StudentMain::nextProblem()
             checkOptions[i]->show();
             checkOptions[i]->setChecked(false);
         }
-        for (int i = 0; i < answer.length(); i++) {
-            checkOptions[answer[i]]->setChecked(true);
+
+        for (int i = 0; i < 4; i++) {
+            if ((answer >> i) & 1 == 1) {
+                checkOptions[i]->setChecked(true);
+            }
         }
     }
+    canWrite = true;
 }
 
 //点击按钮下一题
@@ -200,9 +216,13 @@ void StudentMain::on_nextProblem_clicked()
 //保存单选的答案
 void StudentMain::saveRadioResult(bool)
 {
+    if (!canWrite) {
+        return;
+    }
     for (int i = 0; i < 4; i++) {
         if (radioOptions[i]->isChecked()) {
-            problemList[currIdx].appendAnswer(i);
+            problemList[currIdx].setAnswer(1 << i);
+            emit saveAnswer(currIdx, 1 << i);
             listItem[currIdx]->setIcon(QIcon(":/ok.png"));
             break;
         }
@@ -212,18 +232,22 @@ void StudentMain::saveRadioResult(bool)
 //保存多选的答案
 void StudentMain::saveCheckBoxResult(bool)
 {
-    QVector<int> res;
+    if (!canWrite) {
+        return;
+    }
+    int ans = 0;
     for (int i = 0; i < 4; i++) {
         if (checkOptions[i]->isChecked()) {
-            res.append(i);
+            ans |= 1 << i;
         }
     }
-    if (!res.empty()) {
+    if (ans != 0) {
         listItem[currIdx]->setIcon(QIcon(":/ok.png"));
     } else {
         listItem[currIdx]->setIcon(QIcon(":/init.png"));
     }
-    problemList[currIdx].appendAnswer(res);
+    emit saveAnswer(currIdx, ans);
+    problemList[currIdx].setAnswer(ans);
 }
 
 //点击左侧题目列表框
@@ -238,8 +262,8 @@ void StudentMain::on_listWidget_clicked(const QModelIndex &index)
 //所有切换的题目操作发生之前检查是否有未完成的题目
 bool StudentMain::checkSelect()
 {
-    QVector<int> ans = problemList[currIdx].getAnswer();
-    if (ans.empty()) {
+    int ans = problemList[currIdx].getAnswer();
+    if (ans == 0) {
         if (QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("当前题目还没作答 确认离开吗？"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel) {
             return false;
         }
@@ -268,13 +292,8 @@ void StudentMain::stopExam()
     QJsonArray result;
     for (ExamProblem p : problemList) {
         QJsonObject obj;
-        QJsonArray arr;
         obj.insert("pro_id", p.getId());
-        QVector<int> ans = p.getAnswer();
-        for (int a : ans) {
-            arr.append(a);
-        }
-        obj.insert("answer", arr);
+        obj.insert("answer", p.getAnswer());
         result.append(obj);
     }
     QJsonDocument dom;
@@ -292,17 +311,15 @@ bool StudentMain::restoreData()
         parseExamJson(exam);
         QVector<AnswerInfo> result = cache.getAnswers();
         for(AnswerInfo a : result) {
-            QStringList arr = a._get("ans").toString().split(",");
-            QVector<int> ans;
-            for(QString key : arr) {
-               ans.append(key.toInt());
-            }
-            if (!ans.empty()) {
+            int ans = a._get("ans").toInt();
+
+            if (ans != 0) {
                 listItem[a._get("pro_id").toInt()]->setIcon(QIcon(":/ok.png"));
             } else {
                 listItem[a._get("pro_id").toInt()]->setIcon(QIcon(":/init.png"));
             }
-            problemList[a._get("pro_id").toInt()].appendAnswer(ans);
+            problemList[a._get("pro_id").toInt()].setAnswer(ans);
         }
+        return true;
     }
 }

@@ -49,7 +49,11 @@ QVector<QVariant> ORM::getRow(QString sql, QVector<QVariant> args)
 QVariant ORM::getOne(QString sql, QVector<QVariant> args)
 {
     QVector<QVariant> res = getRow(sql, args);
-    return res[0];
+    if (res.empty()) {
+        return 0;
+    } else {
+        return res[0];
+    }
 }
 
 int ORM::execute(QString sql, QVector<QVariant> args)
@@ -62,6 +66,7 @@ int ORM::execute(QString sql, QVector<QVariant> args)
             return q.numRowsAffected();
         }
     } else {
+       qDebug() << q.lastError().text();
        return 0;
     }
 }

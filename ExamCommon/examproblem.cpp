@@ -17,16 +17,7 @@ void ExamProblem::appendOptions(QString option)
     options.append(option);
 }
 
-void ExamProblem::appendAnswer(int ans)
-{
-    if (answer.empty()) {
-        answer.append(ans);
-    } else {
-        answer[0] = ans;
-    }
-}
-
-void ExamProblem::appendAnswer(QVector<int> ans)
+void ExamProblem::setAnswer(int ans)
 {
     answer = ans;
 }
@@ -59,7 +50,7 @@ QVector<QString> ExamProblem::getOptions()
     return options;
 }
 
-QVector<int> ExamProblem::getAnswer()
+int ExamProblem::getAnswer()
 {
     return answer;
 }

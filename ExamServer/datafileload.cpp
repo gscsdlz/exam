@@ -84,14 +84,7 @@ QVector<ExamProblem> DataFileLoad::getAllProblems(int examId)
         for (int i = 0; i < options.size(); i++) {
             p.appendOptions(options.at(i).toString());
         }
-        data = QJsonDocument::fromJson(row.at(3).toString().toLatin1());
-        QJsonArray answers = data.array();
-        QVector<int> ans;
-        for (int i = 0; i < answers.size(); i++) {
-            ans.push_back(answers.at(i).toInt());
-        }
-        p.appendAnswer(ans);
-        p.debug();
+        p.setAnswer(row.at(3).toInt());
         result.append(p);
     }
     return result;
@@ -146,3 +139,31 @@ bool DataFileLoad::saveAnswerInfo(int studentId, int examId, QString ansStr)
 
     return insertId > 0;
 }
+
+QVector<AnswerInfo> DataFileLoad::getAllAnswer(int examId, int classId)
+{
+    ORM *db = ORM::getInstance();
+    QVector<QVariant> args;
+    args.push_back(classId);
+    args.push_back(examId);
+
+    QVector<AnswerInfo> result;
+    auto res = db->getAll("SELECT answer_result.* FROM answer_result LEFT JOIN class_info ON (class_info.id = answer_result.student_id) WHERE class_id = ? AND exam_id = ?", args);
+
+    for (auto row : res) {
+        AnswerInfo info;
+        info._set("id", row.at(0));
+        info._set("exam_id", row.at(1));
+        info._set("ans_str", row.at(2));
+        result.append(info);
+    }
+    return result;
+}
+
+int DataFileLoad::getProblemAnswer(int pid)
+{
+    ORM *db = ORM::getInstance();
+    QVariant ans = db->getOne("SELECT ans FROM problem_info WHERE pro_id = ?", QVector<QVariant>(1, pid));
+    return ans.toInt();
+}
+
