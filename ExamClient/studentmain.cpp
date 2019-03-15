@@ -7,7 +7,6 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
 {
     canWrite = true;
     client = c;
-    cache.start();
 
     ui->setupUi(this);
     ui->submit->hide();
@@ -51,14 +50,16 @@ StudentMain::StudentMain(QWidget *parent, Client *c) :
 
     setWindowFlags(windowFlags()&~Qt::WindowMinMaxButtonsHint|Qt::WindowMinimizeButtonHint);
     setFixedSize(this->width(),this->height());
+    cache.moveToThread(&cacheThread);
 
     QObject::connect(this, &StudentMain::saveAnswer, &cache, &LocalCache::setAnswer);
+    cacheThread.start();
 }
 
 StudentMain::~StudentMain()
 {
-    cache.terminate();
-    cache.wait();
+    cacheThread.quit();
+    cacheThread.wait();
     delete ui;
 }
 
@@ -287,8 +288,9 @@ void StudentMain::stopExam()
     for (QCheckBox *item : checkOptions) {
         item->hide();
     }
-
     stopExamT->stop();
+    cache.clearCache();
+
     QJsonArray result;
     for (ExamProblem p : problemList) {
         QJsonObject obj;

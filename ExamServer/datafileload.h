@@ -1,9 +1,11 @@
 ﻿#ifndef DATAFILELOAD_H
 #define DATAFILELOAD_H
 
+#include <QObject>
 #include <QVector>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonObject>
 #include "../ExamCommon/examinfodao.h"
 #include "../ExamCommon/studentinfodao.h"
 #include "../ExamCommon/classinfodao.h"
@@ -11,10 +13,11 @@
 #include "../ExamCommon/answerinfo.h"
 #include "orm.h"
 
-class DataFileLoad
+class DataFileLoad : public QObject
 {
+    Q_OBJECT
 public:
-    explicit DataFileLoad();
+    explicit DataFileLoad(QObject *parent = 0);
     QVector<ExamInfoDao> getExamList();
     QVector<ClassInfoDao> getClassList();
     QVector<StudentInfoDao> getStudentInfo(int classId);
@@ -26,6 +29,12 @@ public:
     bool updateExamInfo(int, QString, QString, QString);
     bool updateClassInfo(int, QString);
     bool saveAnswerInfo(int, int, QString);
+public slots:
+    void checkAnswer(int, int);
+signals:
+    void completeCheck(int);
+private:
+    ORM *db;
 };
 
 #endif // DATAFILELOAD_H

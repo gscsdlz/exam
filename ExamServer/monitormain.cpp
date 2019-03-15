@@ -20,10 +20,17 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     model->setHeaderData(5, Qt::Horizontal, QStringLiteral("状态"));
 
     ui->clientTable->setModel(model);
+
+    load.moveToThread(&checkThread);
+    QObject::connect(this, &MonitorMain::startCheck, &load, &DataFileLoad::checkAnswer);
+    QObject::connect(&load, &DataFileLoad::completeCheck, this, &MonitorMain::refreshProgress);
+    checkThread.start();
 }
 
 MonitorMain::~MonitorMain()
 {
+    checkThread.quit();
+    checkThread.wait();
     delete ui;
 }
 
@@ -143,7 +150,7 @@ void MonitorMain::changeClientId(int oldId, int newId)
     if (server->changeClientId(newId, oldId)) {
 
         int row = clientRow[newId];
-        if (model->item(row, 5)->text() == QStringLiteral("已掉线")){
+        if (model->item(row, 5)->text() == QStringLiteral("已掉线") && newId == model->item(row, 0)->text().toInt()){
             model->item(row, 5)->setText(QStringLiteral("已恢复"));
             model->removeRow(clientRow[oldId]);
             server->sendMessage(newId, cmd.stringify(Command::CLIENT_LOGIN_SUCCESS, "1"));
@@ -275,25 +282,19 @@ void MonitorMain::on_unSelect_clicked()
 
 void MonitorMain::on_checkAnswer_clicked()
 {
-    QVector<AnswerInfo> result = load.getAllAnswer(examId, classId);
-    for (AnswerInfo info : result) {
-        QJsonDocument dom = QJsonDocument::fromJson(info._get("ans_str").toString().toLatin1());
-        QJsonArray arr = dom.array();
-
-
-        for (int i = 0; i < arr.count(); i++) {
-            QJsonObject obj = arr.at(i).toObject();
-            int proId = obj.take("pro_id").toInt();
-            int userAns = obj.take("answer").toInt();
-            int correctAns = load.getProblemAnswer(proId);
-            if (userAns == correctAns) {
-
-            }
-        }
-    }
+    emit startCheck(examId, classId);
 }
 
 void MonitorMain::on_closeClient_clicked()
 {
     sendCmd(cmd.stringify(Command::CLIENT_MUST_EXIT, "1"));
 }
+
+void MonitorMain::refreshProgress(int p)
+{
+    qDebug() << p;
+    if (p >= 100) {
+        qDebug() << "done";
+    }
+}
+

@@ -62,6 +62,7 @@ private:
     int currIdx = 0;                        //当前正在作答的题目
     LocalCache cache;
     bool canWrite;
+    QThread cacheThread;
 };
 
 #endif // STUDENTMAIN_H

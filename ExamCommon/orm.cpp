@@ -66,7 +66,6 @@ int ORM::execute(QString sql, QVector<QVariant> args)
             return q.numRowsAffected();
         }
     } else {
-       qDebug() << q.lastError().text();
        return 0;
     }
 }
@@ -78,6 +77,11 @@ bool ORM::query(QSqlQuery &query, QString sql, QVector<QVariant> args)
     for (int i = 0; i < args.length(); i++) {
         query.bindValue(i, args[i]);
     }
-    return query.exec();
+    if (query.exec()) {
+        return true;
+    } else {
+        qDebug() << query.lastError().text();
+        return false;
+    }
 }
 

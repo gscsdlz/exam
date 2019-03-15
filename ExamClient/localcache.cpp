@@ -1,6 +1,7 @@
 ﻿#include "localcache.h"
 
-LocalCache::LocalCache()
+LocalCache::LocalCache(QObject *parent)
+    :QObject(parent)
 {
     ORM::dbSrc = "/client.db";
     db = ORM::getInstance();
@@ -25,16 +26,20 @@ bool LocalCache::setExam(QString str)
 void LocalCache::clearCache()
 {
     db->execute("DELETE FROM exam_cache");
-    db->execute("DELETE FROM answer_cahce");
+    db->execute("DELETE FROM answer_cache");
 }
 
 void LocalCache::setAnswer(int pro_id, int ans)
 {
-    m.lock();
-    type = 1;
-    _proId = pro_id;
-    _ans = ans;
-    m.unlock();
+    QVariant num = db->getOne("SELECT id FROM answer_cache WHERE pro_id = ?", QVector<QVariant>(1, pro_id));
+    QVector<QVariant> args;
+    args.push_back(ans);
+    args.push_back(pro_id);
+    if (num == 0) {
+        db->execute("INSERT INTO answer_cache (ans, pro_id) VALUES (?,?)", args);
+    } else {
+        db->execute("UPDATE answer_cache SET ans = ? WHERE pro_id = ?", args);
+    }
 }
 
 QVector<AnswerInfo> LocalCache::getAnswers()
@@ -48,30 +53,4 @@ QVector<AnswerInfo> LocalCache::getAnswers()
         result.append(info);
     }
     return result;
-}
-
-void LocalCache::run()
-{
-    while(!stop)
-    {
-        m.lock();
-        int t = type;
-        int pro_id = _proId;
-        int ans = _ans;
-        m.unlock();
-        if (t == 1) {
-            QVariant num = db->getOne("SELECT id FROM answer_cache WHERE pro_id = ?", QVector<QVariant>(1, pro_id));
-            QVector<QVariant> args;
-            args.push_back(ans);
-            args.push_back(pro_id);
-            if (num == 0) {
-                db->execute("INSERT INTO answer_cache (ans, pro_id) VALUES (?,?)", args);
-            } else {
-                db->execute("UPDATE answer_cache SET ans = ? WHERE pro_id = ?", args);
-            }
-        }
-        QThread::sleep(1);
-
-       // qDebug() << "ok";
-    }
 }

@@ -7,10 +7,11 @@
 #include "../ExamCommon/orm.h"
 #include "../ExamCommon/answerinfo.h"
 
-class LocalCache : public QThread
+class LocalCache : public QObject
 {
+    Q_OBJECT
 public:
-    LocalCache();
+    LocalCache(QObject * = 0);
     QString getExam();
     bool setExam(QString);
     void clearCache();
@@ -18,8 +19,6 @@ public:
     //bool setAnswers(QVector<AnswerInfo>);
 public slots:
     void setAnswer(int, int);
-protected:
-    void run();
 private:
     ORM *db;
     bool stop;

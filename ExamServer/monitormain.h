@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QWidget>
 #include <QDebug>
+#include <QThread>
 #include <QVector>
 #include <QStandardItemModel>
 #include <QJsonDocument>
@@ -45,7 +46,7 @@ public slots:
     void handleMessage(int, QString, int);
     void addClient(int);
     void handleLostConnect(int);
-
+    void refreshProgress(int);
 private slots:
     void on_orderMode_clicked();
     void on_startLogin_clicked();
@@ -59,6 +60,7 @@ private slots:
 
 signals:
     void sendCtlMsg(int, QString);
+    void startCheck(int, int);
 private:
     Ui::MonitorMain *ui;
     QStandardItemModel *model;
@@ -70,6 +72,7 @@ private:
     QMap<int, int> clientRow;
     QMap<QString, bool> loginVis;
     DataFileLoad load;
+    QThread checkThread;
 };
 
 #endif // MONITORMAIN_H

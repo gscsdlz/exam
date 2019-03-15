@@ -1,16 +1,14 @@
 ﻿#include "datafileload.h"
 
-DataFileLoad::DataFileLoad()
+DataFileLoad::DataFileLoad(QObject *parent)
+    :QObject(parent)
 {
-
+    db = ORM::getInstance();
 }
 
 QVector<ExamInfoDao> DataFileLoad::getExamList()
 {
-    ORM *db = ORM::getInstance();
-
     QVector<ExamInfoDao> result;
-
     QVector<QVector<QVariant>> res = db->getAll("SELECT * FROM exam_info");
     for (QVector<QVariant> row : res) {
         ExamInfoDao dao;
@@ -26,7 +24,6 @@ QVector<ExamInfoDao> DataFileLoad::getExamList()
 
 QVector<ClassInfoDao> DataFileLoad::getClassList()
 {
-    ORM *db = ORM::getInstance();
     QVector<ClassInfoDao> result;
 
     QVector<QVector<QVariant>> res = db->getAll("SELECT class_info.* FROM class_info");
@@ -46,7 +43,6 @@ QVector<ClassInfoDao> DataFileLoad::getClassList()
 
 QVector<StudentInfoDao> DataFileLoad::getStudentInfo(int classId)
 {
-    ORM *db = ORM::getInstance();
     QVector<StudentInfoDao> result;
     QVector<QVariant> args;
     args.push_back(classId);
@@ -71,7 +67,6 @@ QVector<StudentInfoDao> DataFileLoad::getStudentInfo(int classId)
 
 QVector<ExamProblem> DataFileLoad::getAllProblems(int examId)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.push_back(examId);
     auto res = db->getAll("SELECT * FROM problem_info WHERE exam_id = ?", args);
@@ -92,7 +87,6 @@ QVector<ExamProblem> DataFileLoad::getAllProblems(int examId)
 
 ExamInfoDao DataFileLoad::getExamInfo(int examId)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.push_back(examId);
     auto res = db->getRow("SELECT * FROM exam_info WHERE id = ?", args);
@@ -106,7 +100,6 @@ ExamInfoDao DataFileLoad::getExamInfo(int examId)
 
 bool DataFileLoad::updateExamInfo(int id, QString name, QString st, QString et)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.push_back(name);
     args.push_back(st);
@@ -118,7 +111,6 @@ bool DataFileLoad::updateExamInfo(int id, QString name, QString st, QString et)
 
 bool DataFileLoad::updateClassInfo(int id, QString name)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.push_back(name);
     args.push_back(id);
@@ -129,32 +121,31 @@ bool DataFileLoad::updateClassInfo(int id, QString name)
 
 bool DataFileLoad::saveAnswerInfo(int studentId, int examId, QString ansStr)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.append(studentId);
     args.append(examId);
     args.append(ansStr);
 
-    int insertId = db->execute("INSERT INTO answer_result (student_id, exam_id, ans_str) VALUES (?,?,?)", args);
+    int insertId = db->execute("INSERT INTO answer_result (student_id, exam_id, ans_str, score) VALUES (?,?,?, 0)", args);
 
     return insertId > 0;
 }
 
 QVector<AnswerInfo> DataFileLoad::getAllAnswer(int examId, int classId)
 {
-    ORM *db = ORM::getInstance();
     QVector<QVariant> args;
     args.push_back(classId);
     args.push_back(examId);
 
     QVector<AnswerInfo> result;
-    auto res = db->getAll("SELECT answer_result.* FROM answer_result LEFT JOIN class_info ON (class_info.id = answer_result.student_id) WHERE class_id = ? AND exam_id = ?", args);
+    auto res = db->getAll("SELECT answer_result.* FROM answer_result LEFT JOIN class_info ON (class_info.id = answer_result.student_id) WHERE class_info.id = ? AND exam_id = ?", args);
 
     for (auto row : res) {
         AnswerInfo info;
         info._set("id", row.at(0));
-        info._set("exam_id", row.at(1));
-        info._set("ans_str", row.at(2));
+        info._set("student_id", row.at(1));
+        info._set("exam_id", row.at(2));
+        info._set("ans_str", row.at(3));
         result.append(info);
     }
     return result;
@@ -162,8 +153,34 @@ QVector<AnswerInfo> DataFileLoad::getAllAnswer(int examId, int classId)
 
 int DataFileLoad::getProblemAnswer(int pid)
 {
-    ORM *db = ORM::getInstance();
-    QVariant ans = db->getOne("SELECT ans FROM problem_info WHERE pro_id = ?", QVector<QVariant>(1, pid));
+    QVariant ans = db->getOne("SELECT answer FROM problem_info WHERE id = ?", QVector<QVariant>(1, pid));
     return ans.toInt();
 }
 
+void DataFileLoad::checkAnswer(int examId, int classId)
+{
+    QVector<AnswerInfo> result = getAllAnswer(examId, classId);
+    int complete = 0;
+    for (AnswerInfo info : result) {
+        QJsonDocument dom = QJsonDocument::fromJson(info._get("ans_str").toString().toLatin1());
+        QJsonArray arr = dom.array();
+
+        int score = 0;
+
+        for (int i = 0; i < arr.count(); i++) {
+            QJsonObject obj = arr.at(i).toObject();
+            int proId = obj.take("pro_id").toInt();
+            int userAns = obj.take("answer").toInt();
+            int correctAns = getProblemAnswer(proId);
+            if (userAns == correctAns) {
+               score++;
+            }
+        }
+        QVector<QVariant> args;
+        args.append(score);
+        args.append(info._get("id"));
+        db->execute("UPDATE answer_result SET score = ? WHERE id = ?", args);
+        emit completeCheck(int(complete * 1.0 / result.length()));
+    }
+    emit completeCheck(100);
+}
