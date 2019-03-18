@@ -119,6 +119,19 @@ bool DataFileLoad::updateClassInfo(int id, QString name)
     return row > 0;
 }
 
+bool DataFileLoad::updateStudentInfo(int id, QString name, QString stuId, int sex)
+{
+    QVector<QVariant> args;
+
+    args.append(name);
+    args.append(stuId);
+    args.append(sex);
+    args.append(id);
+
+    int row = db->execute("UPDATE student_info SET student_name = ?, student_id = ?, sex = ? WHERE id = ?", args);
+    return row > 0;
+}
+
 bool DataFileLoad::saveAnswerInfo(int studentId, int examId, QString ansStr)
 {
     QVector<QVariant> args;
@@ -183,4 +196,45 @@ void DataFileLoad::checkAnswer(int examId, int classId)
         emit completeCheck(int(complete * 1.0 / result.length()));
     }
     emit completeCheck(100);
+    exportFile(examId, classId);
+
+
+}
+
+void DataFileLoad::exportFile(int examId, int classId)
+{
+    QString path = QCoreApplication::applicationDirPath();
+    path += "/data";
+
+    QFile file(path + "/out.csv");
+
+    if (!file.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text)) {
+         return;
+    }
+    QTextStream out(&file);
+
+    QVector<QVariant> args;
+    args.append(examId);
+    args.append(classId);
+
+    auto result = db->getAll("SELECT score, student_info.*, class_name FROM answer_result "
+               "LEFT JOIN student_info ON (answer_result.student_id = student_info.id) "
+               "LEFT JOIN class_info ON (class_info.id = student_info.class_id) "
+               "WHERE exam_id = ? AND class_id = ?", args);
+
+    out.setCodec("UTF-8");
+    QChar head = 0xfeff;
+    out << head;
+
+    out << QStringLiteral("班级,学号,姓名,性别,分数\n");
+    for (auto row : result) {
+        out << row.at(8).toInt() << ","
+            << row.at(3).toString() << ","
+            << row.at(2).toString() << ","
+            << (row.at(5).toInt() == 1 ? QStringLiteral("女") : QStringLiteral("男")) << ","
+            << row.at(0).toInt() << "\n";
+    }
+    file.close();
+    path.replace("/", "\\");
+    QProcess::startDetached("explorer " + path);
 }

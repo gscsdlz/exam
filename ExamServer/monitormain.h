@@ -47,6 +47,7 @@ public slots:
     void addClient(int);
     void handleLostConnect(int);
     void refreshProgress(int);
+    void updateStudentInfo(QModelIndex, QModelIndex, QVector<int>);
 private slots:
     void on_orderMode_clicked();
     void on_startLogin_clicked();

@@ -6,6 +6,8 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFile>
+#include <QProcess>
 #include "../ExamCommon/examinfodao.h"
 #include "../ExamCommon/studentinfodao.h"
 #include "../ExamCommon/classinfodao.h"
@@ -29,6 +31,8 @@ public:
     bool updateExamInfo(int, QString, QString, QString);
     bool updateClassInfo(int, QString);
     bool saveAnswerInfo(int, int, QString);
+    bool updateStudentInfo(int, QString, QString, int);
+    void exportFile(int, int);
 public slots:
     void checkAnswer(int, int);
 signals:

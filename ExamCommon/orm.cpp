@@ -1,7 +1,7 @@
 ﻿#include "orm.h"
 
 ORM *ORM::instance = NULL;
-QString ORM::dbSrc = "/exam.db";
+QString ORM::dbSrc = "/data/exam.db";
 
 ORM::ORM(QObject *parent) : QObject(parent)
 {

@@ -23,10 +23,10 @@ SOURCES += main.cpp\
     dataconfig.cpp \
     ../ExamCommon/examinfodao.cpp \
     ../ExamCommon/studentinfodao.cpp \
-    orm.cpp \
     ../ExamCommon/classinfodao.cpp \
     ../ExamCommon/dao.cpp \
-    ../ExamCommon/answerinfo.cpp
+    ../ExamCommon/answerinfo.cpp \
+    ../ExamCommon/orm.cpp
 
 HEADERS  += monitormain.h \
     server.h \
@@ -38,11 +38,11 @@ HEADERS  += monitormain.h \
     dataconfig.h \
     ../ExamCommon/examinfodao.h \
     ../ExamCommon/studentinfodao.h \
-    orm.h \
     ../ExamCommon/classinfodao.h \
     ../ExamCommon/dao.h \
     ../ExamCommon/clientstatus.h \
-    ../ExamCommon/answerinfo.h
+    ../ExamCommon/answerinfo.h \
+    ../ExamCommon/orm.h
 
 FORMS    += monitormain.ui \
     dataconfig.ui

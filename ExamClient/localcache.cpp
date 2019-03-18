@@ -3,7 +3,7 @@
 LocalCache::LocalCache(QObject *parent)
     :QObject(parent)
 {
-    ORM::dbSrc = "/client.db";
+    ORM::dbSrc = "/data/client.db";
     db = ORM::getInstance();
     stop = false;
 }

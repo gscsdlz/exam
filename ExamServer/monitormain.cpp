@@ -20,11 +20,14 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     model->setHeaderData(5, Qt::Horizontal, QStringLiteral("状态"));
 
     ui->clientTable->setModel(model);
+    ui->progressBar->setValue(0);
 
     load.moveToThread(&checkThread);
     QObject::connect(this, &MonitorMain::startCheck, &load, &DataFileLoad::checkAnswer);
     QObject::connect(&load, &DataFileLoad::completeCheck, this, &MonitorMain::refreshProgress);
     checkThread.start();
+
+    QObject::connect(model, &QStandardItemModel::dataChanged, this, &MonitorMain::updateStudentInfo);
 }
 
 MonitorMain::~MonitorMain()
@@ -292,9 +295,22 @@ void MonitorMain::on_closeClient_clicked()
 
 void MonitorMain::refreshProgress(int p)
 {
-    qDebug() << p;
+    ui->progressBar->setValue(p);
     if (p >= 100) {
-        qDebug() << "done";
+        ui->progressBar->setValue(100);
     }
 }
 
+void MonitorMain::updateStudentInfo(QModelIndex idx1, QModelIndex, QVector<int>)
+{
+    if (idx1.column() == 1 || idx1.column() == 2 || idx1.column() == 4) {
+        int row = idx1.row();
+
+        load.updateStudentInfo(
+            model->item(row, 0)->text().toInt(),
+            model->item(row, 1)->text(),
+            model->item(row, 2)->text(),
+            (model->item(row, 4)->text() == QStringLiteral("男"))? 0 : 1
+        );
+    }
+}

@@ -3,7 +3,7 @@
 ConfigLoader::ConfigLoader(QObject *parent) : QObject(parent)
 {
     QString path = QCoreApplication::applicationDirPath();
-    config = new QSettings(path + "/config.ini", QSettings::IniFormat);
+    config = new QSettings(path + "/data/config.ini", QSettings::IniFormat);
 }
 
 QString ConfigLoader::getConfig(QString key, QString def)
