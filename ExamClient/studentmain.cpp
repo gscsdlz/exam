@@ -123,6 +123,15 @@ void StudentMain::parseExamJson(QString str)
     //设置关联的倒计时
 
     uint currTs = QDateTime::currentDateTime().toTime_t();
+	if (startTime - currTs < 0) {
+		cache.clear();
+		startTime = currTs + 5;
+	}
+	if (endTime - currTs < 0) {
+		cache.clear();
+		QMessageBox::warning(this, QStringLiteral("错误"), QStringLiteral("考试时间已经过期，请联系教师重新下发试题！"), QMessageBox::ok);
+		return;
+	}
     beginExamT->start((startTime - currTs) * 1000);
     stopExamT->start((endTime - currTs) * 1000);
     showSubmitT->start((startTime + (endTime - startTime) / 2) * 1000);
