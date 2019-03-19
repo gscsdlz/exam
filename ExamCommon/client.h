@@ -31,7 +31,6 @@ private:
     QString host;
     quint16 port;
     QByteArray buffer;
-    int borderCount;
     int clientId;
     QTcpSocket *client;
     qintptr socketDescriptor;

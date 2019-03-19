@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>700</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="font">
@@ -20,23 +20,13 @@
    <string>MonitorMain</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton {
-	font: 14pt &quot;微软雅黑&quot;;
-	background-color: #1abc9c;
-	border: none;
-	color:white;
-	font-size: 16px;
-	border-radius: 6px;
-}
-QPushButton:hover {
-	background-color: rgb(47,226,191);
-}</string>
+   <string notr="true"/>
   </property>
   <widget class="QLabel" name="status">
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>685</y>
+     <y>635</y>
      <width>800</width>
      <height>15</height>
     </rect>
@@ -73,6 +63,19 @@ QPushButton:hover {
      <height>40</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+   </property>
    <property name="text">
     <string>启动登录</string>
    </property>
@@ -85,6 +88,20 @@ QPushButton:hover {
      <width>100</width>
      <height>40</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #e74c3c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: #ec7063;
+}</string>
    </property>
    <property name="text">
     <string>结束考试</string>
@@ -99,6 +116,19 @@ QPushButton:hover {
      <height>40</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+   </property>
    <property name="text">
     <string>编号模式</string>
    </property>
@@ -111,6 +141,20 @@ QPushButton:hover {
      <width>100</width>
      <height>40</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #e74c3c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: #ec7063;
+}</string>
    </property>
    <property name="text">
     <string>关闭客户端</string>
@@ -125,6 +169,19 @@ QPushButton:hover {
      <height>40</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+   </property>
    <property name="text">
     <string>取消强制停止</string>
    </property>
@@ -137,6 +194,19 @@ QPushButton:hover {
      <width>100</width>
      <height>40</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
    </property>
    <property name="text">
     <string>开始考试</string>
@@ -151,6 +221,19 @@ QPushButton:hover {
      <height>40</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+   </property>
    <property name="text">
     <string>全选</string>
    </property>
@@ -164,6 +247,19 @@ QPushButton:hover {
      <height>40</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
+   </property>
    <property name="text">
     <string>判题</string>
    </property>
@@ -176,6 +272,19 @@ QPushButton:hover {
      <width>100</width>
      <height>40</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	font: 14pt &quot;微软雅黑&quot;;
+	background-color: #1abc9c;
+	border: none;
+	color:white;
+	font-size: 16px;
+	border-radius: 6px;
+}
+QPushButton:hover {
+	background-color: rgb(47,226,191);
+}</string>
    </property>
    <property name="text">
     <string>取消全选</string>

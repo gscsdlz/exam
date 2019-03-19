@@ -12,12 +12,12 @@
 #include <QStringList>
 #include <QJsonObject>
 #include <QCryptographicHash>
+#include <QMessageBox>
 #include "server.h"
 #include "../ExamCommon/command.h"
 #include "../ExamCommon/studentinfodao.h"
 #include "../ExamCommon/configloader.h"
 #include "../ExamCommon/examproblem.h"
-#include "../ExamCommon/clientstatus.h"
 #include "../ExamCommon/answerinfo.h"
 #include "datafileload.h"
 
@@ -35,7 +35,7 @@ public:
     void changeClientId(int, int);
     void checkLogin(int, QString);
     void dispatcherProblems(int);
-    void handleStatus(int, int);
+    void handleStatus(int, QString);
     void collectAnswer(int, QString);
     void checkAnswer();
 protected:

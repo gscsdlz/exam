@@ -7,5 +7,7 @@
         <file>r/init_bg_2.jpg</file>
         <file>r/ok.png</file>
         <file>r/settings.png</file>
+        <file>r/teachers.png</file>
+        <file>r/teachers.ico</file>
     </qresource>
 </RCC>

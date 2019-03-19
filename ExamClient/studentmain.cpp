@@ -103,7 +103,7 @@ void StudentMain::initExam()
 //解析服务端发送过来的JSON对象
 void StudentMain::parseExamJson(QString str)
 {
-    QByteArray res = QByteArray::fromBase64(str.toLatin1());
+    QByteArray res = QByteArray::fromBase64(str.toUtf8());
 
     QJsonDocument data = QJsonDocument::fromJson(res, nullptr);
     QJsonObject obj = data.object();
@@ -123,13 +123,15 @@ void StudentMain::parseExamJson(QString str)
     //设置关联的倒计时
 
     uint currTs = QDateTime::currentDateTime().toTime_t();
-	if (startTime - currTs < 0) {
-		cache.clear();
+
+    if (startTime < currTs) {
+        //cache.clear();
 		startTime = currTs + 5;
 	}
-	if (endTime - currTs < 0) {
-		cache.clear();
-		QMessageBox::warning(this, QStringLiteral("错误"), QStringLiteral("考试时间已经过期，请联系教师重新下发试题！"), QMessageBox::ok);
+    if (endTime < currTs) {
+        cache.clearCache();
+        QMessageBox::warning(this, QStringLiteral("错误"), QStringLiteral("考试时间已经过期，请联系教师重新下发试题！"), QMessageBox::Ok);
+        uploadStatus(QStringLiteral("解析题目失败"));
 		return;
 	}
     beginExamT->start((startTime - currTs) * 1000);
@@ -156,6 +158,7 @@ void StudentMain::parseExamJson(QString str)
         ui->listWidget->addItem(item);
     }
     cache.setExam(str);
+    uploadStatus(QStringLiteral("解析题目成功准备考试"));
 }
 
 //开始考试 初始化界面
@@ -170,12 +173,17 @@ void StudentMain::startExam()
     ui->title->show();
     ui->mask->show();
     nextProblem();
+
+    uploadStatus(QStringLiteral("开始考试"));
 }
 
 //切换到下一题
 void StudentMain::nextProblem()
 {
     canWrite = false;
+    if (problemList.size() <= currIdx) {
+        return;
+    }
     ExamProblem p = problemList[currIdx];
     ui->title->setText(p.getTitle());
     QVector<QString> options = p.getOptions();
@@ -188,7 +196,7 @@ void StudentMain::nextProblem()
             radioOptions[i]->show();
         }
         for (int i = 0; i < 4; i++) {
-            if ((answer >> i) & 1 == 1) {
+            if ((answer >> i) != 0) {
                 radioOptions[i]->setChecked(true);
             }
         }
@@ -201,7 +209,7 @@ void StudentMain::nextProblem()
         }
 
         for (int i = 0; i < 4; i++) {
-            if ((answer >> i) & 1 == 1) {
+            if ((answer >> i) != 0) {
                 checkOptions[i]->setChecked(true);
             }
         }
@@ -333,4 +341,9 @@ bool StudentMain::restoreData()
         }
         return true;
     }
+}
+
+void StudentMain::uploadStatus(QString message)
+{
+    client->sendMessage(command.stringify(Command::CLIENT_UPLOAD_STATUS, message.toUtf8().toBase64()));
 }

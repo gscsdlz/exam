@@ -32,6 +32,7 @@ public:
     void nextProblem();
     bool checkSelect();
     bool restoreData();
+    void uploadStatus(QString);
 public slots:
     void startExam();
     void stopExam();

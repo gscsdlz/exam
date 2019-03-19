@@ -35,21 +35,13 @@ void Client::connectToServer(QString hostArg = "", quint16 portArg = 0)
 void Client::readMessage()
 {
     QByteArray res = client->readAll();
-    /*for (int i = 0; i < res.length(); i++) {
-        if (res[i] == '\r') {
-            borderCount++;
-        } else {
-            borderCount = 0;
-        }
-        buffer.append(res[i]);
-        if (borderCount == 3) {
-            QString message = buffer.length() - 3;
-            borderCount = 0;
+    for (int i = 0; i < res.length(); i++) {
+        if (res[i] == '\n') {
+            emit messageRecv(buffer.trimmed(), clientId);
             buffer.clear();
-            emit messageRecv(message);
         }
-    }*/
-    emit messageRecv(res, clientId);
+        buffer.append(res[i]);           
+    }
 }
 
 void Client::sendMessage(QString message)

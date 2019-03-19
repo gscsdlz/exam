@@ -27,6 +27,7 @@ public:
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
+    void uploadStatus(QString);
 public slots:
     void showID(int);
     void handleCmd(int, QString);

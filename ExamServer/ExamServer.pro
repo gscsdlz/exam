@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ExamServer
 TEMPLATE = app
 
+RC_ICONS = ./r/teachers.ico
 
 SOURCES += main.cpp\
         monitormain.cpp \
@@ -40,7 +41,6 @@ HEADERS  += monitormain.h \
     ../ExamCommon/studentinfodao.h \
     ../ExamCommon/classinfodao.h \
     ../ExamCommon/dao.h \
-    ../ExamCommon/clientstatus.h \
     ../ExamCommon/answerinfo.h \
     ../ExamCommon/orm.h
 

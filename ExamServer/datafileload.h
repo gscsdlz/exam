@@ -13,7 +13,7 @@
 #include "../ExamCommon/classinfodao.h"
 #include "../ExamCommon/examproblem.h"
 #include "../ExamCommon/answerinfo.h"
-#include "orm.h"
+#include "../ExamCommon/orm.h"
 
 class DataFileLoad : public QObject
 {

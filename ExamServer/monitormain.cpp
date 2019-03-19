@@ -8,7 +8,9 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     server = s;
     ui->setupUi(this);
 
-    QObject::connect(server, &Server::newClientIn, this, &MonitorMain::addClient);
+    setFixedWidth(1000);
+    setFixedHeight(650);
+
 
     model = new QStandardItemModel(this);
     model->setColumnCount(6);
@@ -18,8 +20,10 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     model->setHeaderData(3, Qt::Horizontal, QStringLiteral("班级"));
     model->setHeaderData(4, Qt::Horizontal, QStringLiteral("性别"));
     model->setHeaderData(5, Qt::Horizontal, QStringLiteral("状态"));
-
     ui->clientTable->setModel(model);
+    ui->clientTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    ui->progressBar->hide();
     ui->progressBar->setValue(0);
 
     load.moveToThread(&checkThread);
@@ -27,6 +31,7 @@ MonitorMain::MonitorMain(Server *s, QWidget *parent) :
     QObject::connect(&load, &DataFileLoad::completeCheck, this, &MonitorMain::refreshProgress);
     checkThread.start();
 
+    QObject::connect(server, &Server::newClientIn, this, &MonitorMain::addClient);
     QObject::connect(model, &QStandardItemModel::dataChanged, this, &MonitorMain::updateStudentInfo);
 }
 
@@ -54,7 +59,7 @@ void MonitorMain::handleMessage(int cmdId, QString message, int clientId)
         collectAnswer(clientId, message);
         break;
     case Command::CLIENT_UPLOAD_STATUS:
-        handleStatus(clientId, message.toInt());
+        handleStatus(clientId, QByteArray::fromBase64(message.toUtf8()));
         break;
     }
 }
@@ -71,6 +76,7 @@ void MonitorMain::addClient(int clientId)
         QStandardItem *item = new QStandardItem();
         model->setItem(row, i, item);
     }
+    handleStatus(clientId, QStringLiteral("连接成功"));
 }
 
 void MonitorMain::on_orderMode_clicked()
@@ -141,6 +147,9 @@ void MonitorMain::setExamAndClass(int e, int c)
 void MonitorMain::handleLostConnect(int clientId)
 {
     int row = clientRow[clientId];
+    if (model->rowCount() <= row) {
+        return;
+    }
     if (loginVis[model->item(row, 2)->text()] == false) {
         model->removeRow(row);
     } else {
@@ -207,6 +216,7 @@ QVector<int> MonitorMain::getSelectedClient()
     for (int i = 0; i < model->rowCount(); i++) {
         QStandardItem *item = model->item(i, 0);
         if (item->checkState() == Qt::Checked && model->item(i, 5)->text() != QStringLiteral("已掉线")) {
+            handleStatus(item->text().toInt(), QStringLiteral("已下发指令"));
             ids.push_back(item->text().toInt());
         }
     }
@@ -230,17 +240,11 @@ void MonitorMain::sendCmd(QString message)
     ui->status->setText(QStringLiteral("下发指令成功，等待客户端响应"));
 }
 
-void MonitorMain::handleStatus(int clientId, int statusType)
+void MonitorMain::handleStatus(int clientId, QString mess)
 {
     int row = clientRow[clientId];
     QStandardItem *item = model->item(row, 5);
-    QString t;
-    switch (statusType)
-    {
-    case ClientStatus::CLIENT_FIRST_CONNECT:
-        break;
-    }
-    item->setText(t);
+    item->setText(mess);
 }
 
 void MonitorMain::collectAnswer(int clientId, QString str)
@@ -285,29 +289,49 @@ void MonitorMain::on_unSelect_clicked()
 
 void MonitorMain::on_checkAnswer_clicked()
 {
+    ui->progressBar->show();
     emit startCheck(examId, classId);
 }
 
 void MonitorMain::on_closeClient_clicked()
 {
     sendCmd(cmd.stringify(Command::CLIENT_MUST_EXIT, "1"));
+    clientRow.clear();
+    loginVis.clear();
+    for(int i = 0; i < model->rowCount(); i++) {
+        model->removeRow(i);
+    }
 }
 
 void MonitorMain::refreshProgress(int p)
 {
     ui->progressBar->setValue(p);
-    if (p >= 100) {
+    if (p >= 101) {
         ui->progressBar->setValue(100);
+        QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("计算完成，开始输出文件！"), QMessageBox::Ok);
+        ui->progressBar->hide();
     }
 }
 
-void MonitorMain::updateStudentInfo(QModelIndex idx1, QModelIndex, QVector<int>)
+void MonitorMain::updateStudentInfo(QModelIndex idx1, QModelIndex, QVector<int> t)
 {
+    int row = idx1.row();
+    if (model->item(row, 1) == NULL || model->item(row, 1)->text() == "") {
+        return;
+    }
     if (idx1.column() == 1 || idx1.column() == 2 || idx1.column() == 4) {
-        int row = idx1.row();
-
+        int id = 0;
+        for(StudentInfoDao s : studentList) {
+            if (s._get("student_id").toString() == model->item(row, 2)->text()) {
+                id = s._get("id").toInt();
+                break;
+            }
+        }
+        if (id == 0) {
+            return;
+        }
         load.updateStudentInfo(
-            model->item(row, 0)->text().toInt(),
+            id,
             model->item(row, 1)->text(),
             model->item(row, 2)->text(),
             (model->item(row, 4)->text() == QStringLiteral("男"))? 0 : 1

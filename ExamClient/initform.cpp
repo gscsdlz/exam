@@ -150,6 +150,8 @@ void InitForm::orderModeOn()
     ui->password->hide();
     ui->username->setText("");
     ui->username->show();
+
+    uploadStatus(QStringLiteral("已进入编号配置状态"));
 }
 
 void InitForm::orderModeOff(QString arg)
@@ -158,6 +160,8 @@ void InitForm::orderModeOff(QString arg)
     ui->password->hide();
     ui->username->hide();
     ui->id->setText(arg);
+
+    uploadStatus(QStringLiteral("已进入等待登录状态"));
 }
 
 void InitForm::loginOn()
@@ -168,6 +172,8 @@ void InitForm::loginOn()
     ui->username->show();
     ui->username->setText("");
     ui->password->setText("");
+
+    uploadStatus(QStringLiteral("已进入登录状态"));
 }
 
 void InitForm::on_login_clicked()
@@ -189,4 +195,9 @@ void InitForm::on_login_clicked()
             ui->status->setText(QStringLiteral("已发起登录"));
         }
     }
+}
+
+void InitForm::uploadStatus(QString message)
+{
+    client->sendMessage(command.stringify(Command::CLIENT_UPLOAD_STATUS, message.toUtf8().toBase64()));
 }

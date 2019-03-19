@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Exam
 TEMPLATE = app
 
+RC_ICONS = ./r/student.ico
 
 SOURCES += main.cpp\
     settingdialog.cpp \
@@ -38,7 +39,6 @@ HEADERS  += \
     ../ExamCommon/examproblem.h \
     ../ExamCommon/answerinfo.h \
     ../ExamCommon/classinfodao.h \
-    ../ExamCommon/clientstatus.h \
     ../ExamCommon/dao.h \
     ../ExamCommon/examinfodao.h \
     ../ExamCommon/studentinfodao.h \

@@ -137,11 +137,14 @@ bool DataFileLoad::saveAnswerInfo(int studentId, int examId, QString ansStr)
     QVector<QVariant> args;
     args.append(studentId);
     args.append(examId);
-    args.append(ansStr);
 
-    int insertId = db->execute("INSERT INTO answer_result (student_id, exam_id, ans_str, score) VALUES (?,?,?, 0)", args);
-
-    return insertId > 0;
+    int row = db->getOne("SELECT COUNT(*) as num FROM answer_result WHERE student_id = ? AND exam_id = ?", args).toInt();
+    if (row == 0) {
+        args.append(ansStr);
+        int insertId = db->execute("INSERT INTO answer_result (student_id, exam_id, ans_str, score) VALUES (?,?,?, 0)", args);
+        return insertId > 0;
+    }
+    return false;
 }
 
 QVector<AnswerInfo> DataFileLoad::getAllAnswer(int examId, int classId)
@@ -195,10 +198,8 @@ void DataFileLoad::checkAnswer(int examId, int classId)
         db->execute("UPDATE answer_result SET score = ? WHERE id = ?", args);
         emit completeCheck(int(complete * 1.0 / result.length()));
     }
-    emit completeCheck(100);
+    emit completeCheck(101);
     exportFile(examId, classId);
-
-
 }
 
 void DataFileLoad::exportFile(int examId, int classId)

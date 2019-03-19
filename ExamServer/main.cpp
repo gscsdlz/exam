@@ -2,7 +2,6 @@
 #include <QApplication>
 #include "server.h"
 #include "dataconfig.h"
-#include "orm.h"
 #include "../ExamCommon/command.h"
 
 int main(int argc, char *argv[])
